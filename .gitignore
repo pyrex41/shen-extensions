@@ -1,0 +1,5 @@
+.shake/
+.bin/
+*.fasl
+.shen-kernel-cache.bin
+.DS_Store

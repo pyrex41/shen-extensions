@@ -1,0 +1,27 @@
+{
+  "schema_version": 1,
+  "name": "shen-extensions",
+  "root": ".",
+  "programs_dir": ".",
+  "default_cwd": ".",
+  "strip_line_prefixes": ["loaded"],
+  "cases": [
+    {
+      "name": "sha256-vectors-agreement",
+      "mode": "script",
+      "program": "tests/run-sha256.shen",
+      "expect": "agreement",
+      "marker": "ALL PASS",
+      "heavy": true,
+      "doc": "NIST/FIPS SHA-256 vectors: all ports identical stdout + ALL PASS. Force pure oracle with SHEN_X_SHA256=pure; default uses host when the port provides it."
+    },
+    {
+      "name": "sha256-smoke",
+      "mode": "script",
+      "program": "programs/sha256-smoke.shen",
+      "expect": "agreement",
+      "marker": "ba7816bf8f01cfea414140de5dae2223b00361a396177a9cb410ff61f20015ad",
+      "doc": "Tiny abc digest — Ratatoskr shake entry and light agreement case."
+    }
+  ]
+}

@@ -1,0 +1,100 @@
+#!/usr/bin/env bash
+# Run a .shen program with *home-directory* = shen-extensions root so
+#   (load "load.shen") / (load "shen/x/sha256.shen")
+# resolve without hard-coded absolute paths.
+#
+# Usage:
+#   ./scripts/shen-x go script myapp.shen
+#   ./scripts/shen-x lua myapp.shen
+#   ./scripts/shen-x rust script myapp.shen
+#   ./scripts/shen-x cl script myapp.shen
+#
+# Or wrap any launcher:
+#   SHEN_X_ROOT=... ./scripts/shen-x -- /path/to/shen script app.shen
+set -euo pipefail
+ROOT="$(cd "$(dirname "$0")/.." && pwd)"
+export SHEN_X_ROOT="${SHEN_X_ROOT:-$ROOT}"
+export PATH="${HOME}/.local/Homebrew/bin:${PATH}"
+export SHEN_KERNEL_DIR="${SHEN_KERNEL_DIR:-$ROOT/../shen-rust/kernel/klambda}"
+
+# Prepend a tiny bootstrap that sets *home-directory* then loads the user file.
+# Written next to the user program's directory for relative loads inside the app.
+bootstrap_for() {
+  local user="$1"
+  local abs
+  abs="$(cd "$(dirname "$user")" && pwd)/$(basename "$user")"
+  local boot
+  boot="$(mktemp "${TMPDIR:-/tmp}/shen-x-boot.XXXXXX")"
+  boot="${boot}.shen"
+  cat > "$boot" <<EOF
+(set *home-directory* "$SHEN_X_ROOT/")
+(load "$abs")
+EOF
+  echo "$boot"
+}
+
+usage() {
+  cat <<'EOF' >&2
+usage: shen-x <go|lua|rust|cl> [script] <file.shen>
+       shen-x -- <launcher> [args...] <file.shen>
+EOF
+  exit 2
+}
+
+[[ $# -ge 1 ]] || usage
+
+if [[ "$1" == "--" ]]; then
+  shift
+  # last arg that ends in .shen is the program
+  args=("$@")
+  file=""
+  for ((i=${#args[@]}-1; i>=0; i--)); do
+    if [[ "${args[i]}" == *.shen ]]; then
+      file="${args[i]}"
+      boot="$(bootstrap_for "$file")"
+      args[i]="$boot"
+      break
+    fi
+  done
+  [[ -n "$file" ]] || { echo "shen-x: no .shen file in argv" >&2; exit 2; }
+  trap 'rm -f "$boot"' EXIT
+  exec "${args[@]}"
+fi
+
+port="$1"; shift
+case "$port" in
+  go)
+    BIN="${SHEN_GO:-$ROOT/../shen-go/.bin/shen-go}"
+    [[ "${1:-}" == "script" ]] && shift
+    file="${1:?missing .shen}"; shift || true
+    boot="$(bootstrap_for "$file")"
+    trap 'rm -f "$boot"' EXIT
+    exec "$BIN" script "$boot" "$@"
+    ;;
+  lua)
+    BIN="${SHEN_LUA:-$ROOT/../shen-lua/bin/shen}"
+    file="${1:?missing .shen}"; shift || true
+    boot="$(bootstrap_for "$file")"
+    trap 'rm -f "$boot"' EXIT
+    exec "$BIN" "$boot" "$@"
+    ;;
+  rust)
+    BIN="${SHEN_RUST:-$ROOT/../shen-rust/target/release/shen-rust}"
+    [[ "${1:-}" == "script" ]] && shift
+    file="${1:?missing .shen}"; shift || true
+    boot="$(bootstrap_for "$file")"
+    trap 'rm -f "$boot"' EXIT
+    exec env SHEN_KERNEL_DIR="$SHEN_KERNEL_DIR" "$BIN" script "$boot" "$@"
+    ;;
+  cl)
+    BIN="${SHEN_CL:-$ROOT/../urdr-shen-cl-41.2/bin/sbcl/shen}"
+    [[ "${1:-}" == "script" ]] && shift
+    file="${1:?missing .shen}"; shift || true
+    boot="$(bootstrap_for "$file")"
+    trap 'rm -f "$boot"' EXIT
+    exec "$BIN" script "$boot" "$@"
+    ;;
+  *)
+    usage
+    ;;
+esac

@@ -36,7 +36,8 @@ if [[ ! -x "$HOST" ]]; then
   fi
   "$R" shake "$ROOT/programs/sha256-smoke.shake.shen" "$OUT"
 else
-  DRV="$(mktemp "${TMPDIR:-/tmp}/sx-shake.XXXXXX.shen")"
+  DRV="$(mktemp "${TMPDIR:-/tmp}/sx-shake.XXXXXX")"
+  DRV="${DRV}.shen"
   # Absolute paths in the file list so host cwd = ratatoskr is fine.
   cat > "$DRV" <<EOF
 (load "ratatoskr.shen")

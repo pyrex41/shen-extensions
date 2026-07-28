@@ -342,14 +342,27 @@
 \\ ---- hex ----
 
 
-\\ Pure-only public API for Ratatoskr / standalone artifacts.
-\\ Always uses shen.x.sha256-octets-pure (no host). Load sha256-pure.shen first.
+\\ Public API for multi-file Ratatoskr / standalone artifacts.
+\\ Prefer host when the port installed shen.x.sha256-octets-host (and set
+\\ shen.x.*sha256-backend* to host); otherwise pure (load sha256-pure.shen first).
+\\
+\\ No (load …) — pure must already be in the shake file list.
+
+(define shen.x.host-sha256?
+  -> (trap-error
+       (= (value shen.x.*sha256-backend*) host)
+       (/. E
+           (trap-error
+             (do (shen.x.sha256-octets-host []) true)
+             (/. E2 false)))))
 
 (define shen.x.sha256-backend
-  -> pure)
+  -> (if (shen.x.host-sha256?) host pure))
 
 (define shen.x.sha256-octets
-  Bs -> (shen.x.sha256-octets-pure Bs))
+  Bs -> (if (shen.x.host-sha256?)
+            (shen.x.sha256-octets-host Bs)
+            (shen.x.sha256-octets-pure Bs)))
 
 (define shen.x.hex-digit
   0 -> "0"

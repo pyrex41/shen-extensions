@@ -15,15 +15,29 @@ Cross-repo path:
 | Agreement | [Bifrost](https://github.com/pyrex41/bifrost) | run suite across ports |
 | Shake / deploy slice | [Ratatoskr](https://github.com/pyrex41/ratatoskr) | tree-shake + standalone build |
 
-## SHA-256
+## User model (Shen only)
 
 ```shen
-(load "shen/x/sha256.shen")
+\\ From the extensions repo root, or after setting *home-directory* there:
+(load "load.shen")
+
 (shen.x.sha256-hex (shen.x.string->octets "abc"))
 \\ => ba7816bf8f01cfea414140de5dae2223b00361a396177a9cb410ff61f20015ad
 
-(shen.x.sha256-backend)   \\ host | pure
+(shen.x.sha256-backend)   \\ host | pure — automatic
 ```
+
+No per-port `#ifdef`. If the port installed a native host, digests are fast;
+otherwise pure Shen runs with **identical** digests.
+
+```bash
+# convenience wrapper sets *home-directory* for you:
+./scripts/shen-x go script examples/hello-sha.shen
+./scripts/shen-x lua examples/hello-sha.shen
+./scripts/shen-x rust script examples/hello-sha.shen
+```
+
+## SHA-256 API
 
 | Symbol | Meaning |
 | --- | --- |
@@ -83,13 +97,10 @@ make check            # bifrost + shake (SX_SHAKE_DEPLOY=1 adds deploy path)
 
 - `sha256-smoke-deploy` — self-contained **pure** bundle
 
-**Why two smoke entries?** Ratatoskr does not follow `(load …)`. Host backends
-are not in the shaken slice either. Stage-1 / deploy use pure multi-file (or
-the bundled pure entry); live agreement uses host when the port provides it.
-
-Deploy-path note: pure Shen SHA is intentionally slow. Expect multi-minute
-standalone runs until builders inject host primitives. `make check` leaves
-deploy opt-in (`SX_SHAKE_DEPLOY=1`).
+**Why two smoke entries?** Ratatoskr does not follow `(load …)`, so deploy uses
+a multi-file / bundled entry that includes pure **and** host-preferring API.
+Stage-2 builders inject host crypto (go/lua/rust) so standalone runs stay fast;
+pure remains the fallback if host is disabled (`SHEN_X_SHA256=pure`).
 
 ## Layout
 

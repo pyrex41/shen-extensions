@@ -10,14 +10,20 @@
 \\ shen/x/sha256-pure.shen and is lazy-loaded only when host is absent
 \\ (so Lua never compiles pure tables on the host path; no load-echo noise).
 
+\\ Host is present when the port set shen.x.*sha256-backend* to host, or when
+\\ shen.x.sha256-octets-host is bound and accepts [].
 (define shen.x.host-sha256?
   -> (trap-error
-       (do (shen.x.sha256-octets-host []) true)
-       (/. E false)))
+       (= (value shen.x.*sha256-backend*) host)
+       (/. E
+           (trap-error
+             (do (shen.x.sha256-octets-host []) true)
+             (/. E2 false)))))
 
 (define shen.x.sha256-backend
   -> (if (shen.x.host-sha256?) host pure))
 
+\\ Lazy-load pure only when host is absent (Lua 200-local limit; load silence).
 (define shen.x.ensure-pure
   -> (trap-error
        (value shen.x.*pure-loaded*)

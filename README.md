@@ -13,7 +13,7 @@ Cross-repo path:
 | Contract + pure oracle | this repo | `shen.x.sha256-*` API and FIPS vectors |
 | Host backends | each Shen port | ideal native path |
 | Agreement | [Bifrost](https://github.com/pyrex41/bifrost) | run suite across ports |
-| Shake / deploy slice | [Ratatoskr](https://github.com/pyrex41/ratatoskr) | tree-shake entry programs |
+| Shake / deploy slice | [Ratatoskr](https://github.com/pyrex41/ratatoskr) | tree-shake + standalone build |
 
 ## SHA-256
 
@@ -43,50 +43,74 @@ Force pure on ports that also have host: `SHEN_X_SHA256=pure`.
 | **shen-rust** | `sha2` crate | shipped (`register_hot_overrides`) |
 | **shen-cl** | OpenSSL alien (`ports/shen-cl/sha256-host.lsp`) | image-dependent; pure works but is slow |
 
-## Bifrost (cross-port)
+## Bifrost + Ratatoskr (cross-port)
 
-From this repo (sibling checkouts of ports + bifrost):
+Sibling layout expected:
 
-```bash
-export BIFROST_ADAPTERS=$PWD/adapters.json
-export SHEN_KERNEL_DIR=../shen-rust/kernel/klambda   # if needed
-export PATH="$HOME/.local/Homebrew/bin:$PATH"         # luajit / openssl
-
-./scripts/run-bifrost.sh
-# or:
-bifrost -suite ./bifrost.suite.json -heavy \
-  -impls shen-go,shen-lua,shen-rust
+```text
+~/projects/
+  shen-extensions/   ← this repo
+  bifrost/
+  ratatoskr/
+  shen-go/  shen-lua/  shen-rust/  (host backends)
 ```
 
-Cases:
+```bash
+export PATH="$HOME/.local/Homebrew/bin:$PATH"
+export SHEN_KERNEL_DIR=$PWD/../shen-rust/kernel/klambda
+# stage-1 host for ratatoskr (working Shen 41.2):
+export BIFROST_SHEN_CL=$PWD/../urdr-shen-cl-41.2/bin/sbcl/shen
+export RATATOSKR_HOST=$BIFROST_SHEN_CL
+
+make bifrost          # load-from-source agreement (host SHA on go/lua/rust)
+make shake            # Ratatoskr stage-1 multi-file pure slice
+make bifrost-shake    # Bifrost --shake: build+run standalone per target
+make check            # bifrost + shake (SX_SHAKE_DEPLOY=1 adds deploy path)
+```
+
+| Path | What it proves | Entry |
+| --- | --- | --- |
+| **Bifrost agreement** | same stdout on every port (host or pure) | `bifrost.suite.json` |
+| **Ratatoskr stage-1** | pure call graph → `kernel.kl` + user KL | multi-file: pure + portable + body |
+| **Bifrost `--shake`** | standalone artifacts agree (deploy path) | `bifrost.shake.suite.json` |
+
+**Agreement cases** (`make bifrost`):
 
 - `sha256-vectors-agreement` — NIST/FIPS vectors, marker `ALL PASS`
-- `sha256-smoke` — `"abc"` digest agreement (also a Ratatoskr entry)
+- `sha256-smoke` — `"abc"` via `(load "shen/x/sha256.shen")` (**host** when present)
 
-## Ratatoskr (shake)
+**Deploy case** (`make bifrost-shake`):
 
-```bash
-./scripts/shake.sh                 # stage-1 shake of programs/sha256-smoke.shen
-# or:
-ratatoskr shake programs/sha256-smoke.shen .shake/sha256-smoke
-```
+- `sha256-smoke-deploy` — self-contained **pure** bundle
 
-Host backends are process-level: shaken standalone artifacts use pure unless
-the target builder injects the host primitive. Stage-1 `kernel.kl` parity is
-still useful for the pure slice.
+**Why two smoke entries?** Ratatoskr does not follow `(load …)`. Host backends
+are not in the shaken slice either. Stage-1 / deploy use pure multi-file (or
+the bundled pure entry); live agreement uses host when the port provides it.
+
+Deploy-path note: pure Shen SHA is intentionally slow. Expect multi-minute
+standalone runs until builders inject host primitives. `make check` leaves
+deploy opt-in (`SX_SHAKE_DEPLOY=1`).
 
 ## Layout
 
 ```
-shen/x/sha256.shen       public API + host detect + lazy pure load
-shen/x/sha256-pure.shen   pure oracle (not loaded when host is present)
-tests/run-sha256.shen    Bifrost vector suite
-programs/sha256-smoke.shen
-bifrost.suite.json
-adapters.json            local launcher paths (edit for your machine)
-ports/shen-cl/           optional CL OpenSSL host
+shen/x/sha256.shen               public API + host detect + lazy pure
+shen/x/sha256-pure.shen          pure oracle
+shen/x/sha256-portable.shen      pure-only API (shake / standalone)
+programs/sha256-smoke.shen       Bifrost agreement (load + host)
+programs/sha256-smoke-body.shen  multi-file shake body
+programs/sha256-smoke.shake.shen bundled pure entry (Bifrost --shake)
+tests/run-sha256.shen            vector suite
+bifrost.suite.json               load-from-source agreement
+bifrost.shake.suite.json         deploy-path (--shake) suite
+adapters.json                    local port launchers
 scripts/run-bifrost.sh
-scripts/shake.sh
+scripts/run-bifrost-shake.sh
+scripts/shake.sh                 multi-file stage-1
+scripts/bundle-shake-entry.sh
+scripts/check.sh
+Makefile
+ports/shen-cl/                   optional CL OpenSSL host
 ```
 
 ## License

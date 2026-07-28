@@ -1,0 +1,19 @@
+{
+  "schema_version": 1,
+  "name": "shen-extensions-shake",
+  "root": ".",
+  "programs_dir": ".",
+  "default_cwd": ".",
+  "strip_line_prefixes": ["loaded"],
+  "cases": [
+    {
+      "name": "sha256-smoke-deploy",
+      "mode": "script",
+      "program": "programs/sha256-smoke.shake.shen",
+      "expect": "agreement",
+      "marker": "ba7816bf8f01cfea414140de5dae2223b00361a396177a9cb410ff61f20015ad",
+      "heavy": true,
+      "doc": "Self-contained pure SHA smoke for Bifrost --shake (Ratatoskr build+run per target, byte-identical stdout)."
+    }
+  ]
+}

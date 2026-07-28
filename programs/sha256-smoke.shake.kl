@@ -1,0 +1,133 @@
+(defun shen.x.u32.mod (V754) (shen.x.u32.mod-pos V754))
+
+(defun shen.x.u32.mod-pos (V755) (if (< V755 0) (shen.x.u32.mod-pos (+ V755 4294967296)) (if (>= V755 4294967296) (shen.x.u32.mod-pos (- V755 4294967296)) V755)))
+
+(defun shen.x.u32.add (V756 V757) (shen.x.u32.mod (+ V756 V757)))
+
+(defun shen.x.u32.add3 (V758 V759 V760) (shen.x.u32.add (shen.x.u32.add V758 V759) V760))
+
+(defun shen.x.u32.add4 (V761 V762 V763 V764) (shen.x.u32.add (shen.x.u32.add3 V761 V762 V763) V764))
+
+(defun shen.x.u32.add5 (V765 V766 V767 V768 V769) (shen.x.u32.add (shen.x.u32.add4 V765 V766 V767 V768) V769))
+
+(defun shen.x.quot (V770 V771) (if (or (< V770 0) (<= V771 0)) (simple-error "shen.x.quot: need N>=0 M>0") (if (< V770 V771) 0 (let W772 (/ V770 V771) (if (integer? W772) W772 (shen.x.quot-slow V770 V771))))))
+
+(defun shen.x.quot-slow (V773 V774) (if (< V773 V774) 0 (let W775 (shen.x.quot-slow V773 (* V774 2)) (let W776 (- V773 (* W775 (* V774 2))) (if (< W776 V774) (* W775 2) (+ (* W775 2) 1))))))
+
+(defun shen.x.rem (V777 V778) (- V777 (* V778 (shen.x.quot V777 V778))))
+
+(defun shen.x.pow2-table () (cons 1 (cons 2 (cons 4 (cons 8 (cons 16 (cons 32 (cons 64 (cons 128 (cons 256 (cons 512 (cons 1024 (cons 2048 (cons 4096 (cons 8192 (cons 16384 (cons 32768 (cons 65536 (cons 131072 (cons 262144 (cons 524288 (cons 1048576 (cons 2097152 (cons 4194304 (cons 8388608 (cons 16777216 (cons 33554432 (cons 67108864 (cons 134217728 (cons 268435456 (cons 536870912 (cons 1073741824 (cons 2147483648 (cons 4294967296 ()))))))))))))))))))))))))))))))))))
+
+(defun shen.x.pow2 (V779) (shen.x.list.nth V779 (shen.x.pow2-table)))
+
+(defun shen.x.nibble-and-table () (cons 0 (cons 0 (cons 0 (cons 0 (cons 0 (cons 0 (cons 0 (cons 0 (cons 0 (cons 0 (cons 0 (cons 0 (cons 0 (cons 0 (cons 0 (cons 0 (cons 0 (cons 1 (cons 0 (cons 1 (cons 0 (cons 1 (cons 0 (cons 1 (cons 0 (cons 1 (cons 0 (cons 1 (cons 0 (cons 1 (cons 0 (cons 1 (cons 0 (cons 0 (cons 2 (cons 2 (cons 0 (cons 0 (cons 2 (cons 2 (cons 0 (cons 0 (cons 2 (cons 2 (cons 0 (cons 0 (cons 2 (cons 2 (cons 0 (cons 1 (cons 2 (cons 3 (cons 0 (cons 1 (cons 2 (cons 3 (cons 0 (cons 1 (cons 2 (cons 3 (cons 0 (cons 1 (cons 2 (cons 3 (cons 0 (cons 0 (cons 0 (cons 0 (cons 4 (cons 4 (cons 4 (cons 4 (cons 0 (cons 0 (cons 0 (cons 0 (cons 4 (cons 4 (cons 4 (cons 4 (cons 0 (cons 1 (cons 0 (cons 1 (cons 4 (cons 5 (cons 4 (cons 5 (cons 0 (cons 1 (cons 0 (cons 1 (cons 4 (cons 5 (cons 4 (cons 5 (cons 0 (cons 0 (cons 2 (cons 2 (cons 4 (cons 4 (cons 6 (cons 6 (cons 0 (cons 0 (cons 2 (cons 2 (cons 4 (cons 4 (cons 6 (cons 6 (cons 0 (cons 1 (cons 2 (cons 3 (cons 4 (cons 5 (cons 6 (cons 7 (cons 0 (cons 1 (cons 2 (cons 3 (cons 4 (cons 5 (cons 6 (cons 7 (cons 0 (cons 0 (cons 0 (cons 0 (cons 0 (cons 0 (cons 0 (cons 0 (cons 8 (cons 8 (cons 8 (cons 8 (cons 8 (cons 8 (cons 8 (cons 8 (cons 0 (cons 1 (cons 0 (cons 1 (cons 0 (cons 1 (cons 0 (cons 1 (cons 8 (cons 9 (cons 8 (cons 9 (cons 8 (cons 9 (cons 8 (cons 9 (cons 0 (cons 0 (cons 2 (cons 2 (cons 0 (cons 0 (cons 2 (cons 2 (cons 8 (cons 8 (cons 10 (cons 10 (cons 8 (cons 8 (cons 10 (cons 10 (cons 0 (cons 1 (cons 2 (cons 3 (cons 0 (cons 1 (cons 2 (cons 3 (cons 8 (cons 9 (cons 10 (cons 11 (cons 8 (cons 9 (cons 10 (cons 11 (cons 0 (cons 0 (cons 0 (cons 0 (cons 4 (cons 4 (cons 4 (cons 4 (cons 8 (cons 8 (cons 8 (cons 8 (cons 12 (cons 12 (cons 12 (cons 12 (cons 0 (cons 1 (cons 0 (cons 1 (cons 4 (cons 5 (cons 4 (cons 5 (cons 8 (cons 9 (cons 8 (cons 9 (cons 12 (cons 13 (cons 12 (cons 13 (cons 0 (cons 0 (cons 2 (cons 2 (cons 4 (cons 4 (cons 6 (cons 6 (cons 8 (cons 8 (cons 10 (cons 10 (cons 12 (cons 12 (cons 14 (cons 14 (cons 0 (cons 1 (cons 2 (cons 3 (cons 4 (cons 5 (cons 6 (cons 7 (cons 8 (cons 9 (cons 10 (cons 11 (cons 12 (cons 13 (cons 14 (cons 15 ())))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))
+
+(defun shen.x.nibble-or-table () (cons 0 (cons 1 (cons 2 (cons 3 (cons 4 (cons 5 (cons 6 (cons 7 (cons 8 (cons 9 (cons 10 (cons 11 (cons 12 (cons 13 (cons 14 (cons 15 (cons 1 (cons 1 (cons 3 (cons 3 (cons 5 (cons 5 (cons 7 (cons 7 (cons 9 (cons 9 (cons 11 (cons 11 (cons 13 (cons 13 (cons 15 (cons 15 (cons 2 (cons 3 (cons 2 (cons 3 (cons 6 (cons 7 (cons 6 (cons 7 (cons 10 (cons 11 (cons 10 (cons 11 (cons 14 (cons 15 (cons 14 (cons 15 (cons 3 (cons 3 (cons 3 (cons 3 (cons 7 (cons 7 (cons 7 (cons 7 (cons 11 (cons 11 (cons 11 (cons 11 (cons 15 (cons 15 (cons 15 (cons 15 (cons 4 (cons 5 (cons 6 (cons 7 (cons 4 (cons 5 (cons 6 (cons 7 (cons 12 (cons 13 (cons 14 (cons 15 (cons 12 (cons 13 (cons 14 (cons 15 (cons 5 (cons 5 (cons 7 (cons 7 (cons 5 (cons 5 (cons 7 (cons 7 (cons 13 (cons 13 (cons 15 (cons 15 (cons 13 (cons 13 (cons 15 (cons 15 (cons 6 (cons 7 (cons 6 (cons 7 (cons 6 (cons 7 (cons 6 (cons 7 (cons 14 (cons 15 (cons 14 (cons 15 (cons 14 (cons 15 (cons 14 (cons 15 (cons 7 (cons 7 (cons 7 (cons 7 (cons 7 (cons 7 (cons 7 (cons 7 (cons 15 (cons 15 (cons 15 (cons 15 (cons 15 (cons 15 (cons 15 (cons 15 (cons 8 (cons 9 (cons 10 (cons 11 (cons 12 (cons 13 (cons 14 (cons 15 (cons 8 (cons 9 (cons 10 (cons 11 (cons 12 (cons 13 (cons 14 (cons 15 (cons 9 (cons 9 (cons 11 (cons 11 (cons 13 (cons 13 (cons 15 (cons 15 (cons 9 (cons 9 (cons 11 (cons 11 (cons 13 (cons 13 (cons 15 (cons 15 (cons 10 (cons 11 (cons 10 (cons 11 (cons 14 (cons 15 (cons 14 (cons 15 (cons 10 (cons 11 (cons 10 (cons 11 (cons 14 (cons 15 (cons 14 (cons 15 (cons 11 (cons 11 (cons 11 (cons 11 (cons 15 (cons 15 (cons 15 (cons 15 (cons 11 (cons 11 (cons 11 (cons 11 (cons 15 (cons 15 (cons 15 (cons 15 (cons 12 (cons 13 (cons 14 (cons 15 (cons 12 (cons 13 (cons 14 (cons 15 (cons 12 (cons 13 (cons 14 (cons 15 (cons 12 (cons 13 (cons 14 (cons 15 (cons 13 (cons 13 (cons 15 (cons 15 (cons 13 (cons 13 (cons 15 (cons 15 (cons 13 (cons 13 (cons 15 (cons 15 (cons 13 (cons 13 (cons 15 (cons 15 (cons 14 (cons 15 (cons 14 (cons 15 (cons 14 (cons 15 (cons 14 (cons 15 (cons 14 (cons 15 (cons 14 (cons 15 (cons 14 (cons 15 (cons 14 (cons 15 (cons 15 (cons 15 (cons 15 (cons 15 (cons 15 (cons 15 (cons 15 (cons 15 (cons 15 (cons 15 (cons 15 (cons 15 (cons 15 (cons 15 (cons 15 (cons 15 ())))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))
+
+(defun shen.x.nibble-xor-table () (cons 0 (cons 1 (cons 2 (cons 3 (cons 4 (cons 5 (cons 6 (cons 7 (cons 8 (cons 9 (cons 10 (cons 11 (cons 12 (cons 13 (cons 14 (cons 15 (cons 1 (cons 0 (cons 3 (cons 2 (cons 5 (cons 4 (cons 7 (cons 6 (cons 9 (cons 8 (cons 11 (cons 10 (cons 13 (cons 12 (cons 15 (cons 14 (cons 2 (cons 3 (cons 0 (cons 1 (cons 6 (cons 7 (cons 4 (cons 5 (cons 10 (cons 11 (cons 8 (cons 9 (cons 14 (cons 15 (cons 12 (cons 13 (cons 3 (cons 2 (cons 1 (cons 0 (cons 7 (cons 6 (cons 5 (cons 4 (cons 11 (cons 10 (cons 9 (cons 8 (cons 15 (cons 14 (cons 13 (cons 12 (cons 4 (cons 5 (cons 6 (cons 7 (cons 0 (cons 1 (cons 2 (cons 3 (cons 12 (cons 13 (cons 14 (cons 15 (cons 8 (cons 9 (cons 10 (cons 11 (cons 5 (cons 4 (cons 7 (cons 6 (cons 1 (cons 0 (cons 3 (cons 2 (cons 13 (cons 12 (cons 15 (cons 14 (cons 9 (cons 8 (cons 11 (cons 10 (cons 6 (cons 7 (cons 4 (cons 5 (cons 2 (cons 3 (cons 0 (cons 1 (cons 14 (cons 15 (cons 12 (cons 13 (cons 10 (cons 11 (cons 8 (cons 9 (cons 7 (cons 6 (cons 5 (cons 4 (cons 3 (cons 2 (cons 1 (cons 0 (cons 15 (cons 14 (cons 13 (cons 12 (cons 11 (cons 10 (cons 9 (cons 8 (cons 8 (cons 9 (cons 10 (cons 11 (cons 12 (cons 13 (cons 14 (cons 15 (cons 0 (cons 1 (cons 2 (cons 3 (cons 4 (cons 5 (cons 6 (cons 7 (cons 9 (cons 8 (cons 11 (cons 10 (cons 13 (cons 12 (cons 15 (cons 14 (cons 1 (cons 0 (cons 3 (cons 2 (cons 5 (cons 4 (cons 7 (cons 6 (cons 10 (cons 11 (cons 8 (cons 9 (cons 14 (cons 15 (cons 12 (cons 13 (cons 2 (cons 3 (cons 0 (cons 1 (cons 6 (cons 7 (cons 4 (cons 5 (cons 11 (cons 10 (cons 9 (cons 8 (cons 15 (cons 14 (cons 13 (cons 12 (cons 3 (cons 2 (cons 1 (cons 0 (cons 7 (cons 6 (cons 5 (cons 4 (cons 12 (cons 13 (cons 14 (cons 15 (cons 8 (cons 9 (cons 10 (cons 11 (cons 4 (cons 5 (cons 6 (cons 7 (cons 0 (cons 1 (cons 2 (cons 3 (cons 13 (cons 12 (cons 15 (cons 14 (cons 9 (cons 8 (cons 11 (cons 10 (cons 5 (cons 4 (cons 7 (cons 6 (cons 1 (cons 0 (cons 3 (cons 2 (cons 14 (cons 15 (cons 12 (cons 13 (cons 10 (cons 11 (cons 8 (cons 9 (cons 6 (cons 7 (cons 4 (cons 5 (cons 2 (cons 3 (cons 0 (cons 1 (cons 15 (cons 14 (cons 13 (cons 12 (cons 11 (cons 10 (cons 9 (cons 8 (cons 7 (cons 6 (cons 5 (cons 4 (cons 3 (cons 2 (cons 1 (cons 0 ())))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))
+
+(defun shen.x.nibble-op (V780 V781 V782) (shen.x.list.nth (+ (* V781 16) V782) V780))
+
+(defun shen.x.u32.lop (V783 V784 V785 V786 V787 V788) (if (> V788 7) V787 (let W789 (shen.x.rem (shen.x.quot V784 (shen.x.pow2 (* V788 4))) 16) (let W790 (shen.x.rem (shen.x.quot V785 (shen.x.pow2 (* V788 4))) 16) (let W791 (shen.x.nibble-op V783 W789 W790) (let W792 (+ V787 (* W791 (shen.x.pow2 (* V788 4)))) (shen.x.u32.lop V783 V784 V785 V786 W792 (+ V788 1))))))))
+
+(defun shen.x.u32.and (V793 V794) (shen.x.u32.lop (shen.x.nibble-and-table) (shen.x.u32.mod V793) (shen.x.u32.mod V794) 0 0 0))
+
+(defun shen.x.u32.or (V795 V796) (shen.x.u32.lop (shen.x.nibble-or-table) (shen.x.u32.mod V795) (shen.x.u32.mod V796) 0 0 0))
+
+(defun shen.x.u32.xor (V797 V798) (shen.x.u32.lop (shen.x.nibble-xor-table) (shen.x.u32.mod V797) (shen.x.u32.mod V798) 0 0 0))
+
+(defun shen.x.u32.not (V799) (shen.x.u32.xor (shen.x.u32.mod V799) 4294967295))
+
+(defun shen.x.u32.shr (V800 V801) (if (<= V801 0) (shen.x.u32.mod V800) (shen.x.quot (shen.x.u32.mod V800) (shen.x.pow2 V801))))
+
+(defun shen.x.u32.shl (V802 V803) (if (<= V803 0) (shen.x.u32.mod V802) (shen.x.u32.mod (* (shen.x.u32.mod V802) (shen.x.pow2 V803)))))
+
+(defun shen.x.u32.rotr (V804 V805) (let W806 (shen.x.rem V805 32) (shen.x.u32.or (shen.x.u32.shr V804 W806) (shen.x.u32.shl V804 (- 32 W806)))))
+
+(defun shen.x.list.nth (V807 V808) (if (and (cons? V808) (= V807 0)) (hd V808) (if (and (cons? V808) (> V807 0)) (shen.x.list.nth (- V807 1) (tl V808)) (simple-error "shen.x.list.nth"))))
+
+(defun shen.x.list.length (V811) (cond ((= () V811) 0) ((cons? V811) (+ 1 (shen.x.list.length (tl V811)))) (true (simple-error "partial function shen.x.list.length"))))
+
+(defun shen.x.list.take (V818 V819) (cond ((= 0 V818) ()) ((cons? V819) (cons (hd V819) (shen.x.list.take (- V818 1) (tl V819)))) (true (simple-error "shen.x.list.take"))))
+
+(defun shen.x.list.drop (V826 V827) (cond ((= 0 V826) V827) ((cons? V827) (shen.x.list.drop (- V826 1) (tl V827))) (true (simple-error "shen.x.list.drop"))))
+
+(defun shen.x.list.append (V828 V829) (cond ((= () V828) V829) ((cons? V828) (cons (hd V828) (shen.x.list.append (tl V828) V829))) (true (simple-error "partial function shen.x.list.append"))))
+
+(defun shen.x.list.repeat (V832 V833) (cond ((= 0 V832) ()) (true (cons V833 (shen.x.list.repeat (- V832 1) V833)))))
+
+(defun shen.x.list.reverse (V834) (shen.x.list.reverse-h V834 ()))
+
+(defun shen.x.list.reverse-h (V835 V836) (cond ((= () V835) V836) ((cons? V835) (shen.x.list.reverse-h (tl V835) (cons (hd V835) V836))) (true (simple-error "partial function shen.x.list.reverse-h"))))
+
+(defun shen.x.octets-ok? (V839) (cond ((= () V839) true) ((cons? V839) (if (and (number? (hd V839)) (and (>= (hd V839) 0) (<= (hd V839) 255))) (shen.x.octets-ok? (tl V839)) false)) (true false)))
+
+(defun shen.x.bytes->words (V842) (cond ((= () V842) ()) ((and (cons? V842) (and (cons? (tl V842)) (and (cons? (tl (tl V842))) (cons? (tl (tl (tl V842))))))) (cons (shen.x.u32.add4 (shen.x.u32.shl (hd V842) 24) (shen.x.u32.shl (hd (tl V842)) 16) (shen.x.u32.shl (hd (tl (tl V842))) 8) (hd (tl (tl (tl V842))))) (shen.x.bytes->words (tl (tl (tl (tl V842))))))) (true (simple-error "shen.x.bytes->words: length not multiple of 4"))))
+
+(defun shen.x.word->bytes (V843) (cons (shen.x.u32.shr V843 24) (cons (shen.x.rem (shen.x.u32.shr V843 16) 256) (cons (shen.x.rem (shen.x.u32.shr V843 8) 256) (cons (shen.x.rem V843 256) ())))))
+
+(defun shen.x.words->bytes (V844) (cond ((= () V844) ()) ((cons? V844) (shen.x.list.append (shen.x.word->bytes (hd V844)) (shen.x.words->bytes (tl V844)))) (true (simple-error "partial function shen.x.words->bytes"))))
+
+(defun shen.x.bitlen-bytes (V845) (let W846 (* V845 8) (shen.x.list.append (cons 0 (cons 0 (cons 0 (cons 0 ())))) (shen.x.word->bytes (shen.x.u32.mod W846)))))
+
+(defun shen.x.sha256-pad (V847) (let W848 (shen.x.list.length V847) (let W849 (shen.x.rem (+ W848 1) 64) (let W850 (if (<= W849 56) (- 56 W849) (- 120 W849)) (shen.x.list.append V847 (shen.x.list.append (cons 128 ()) (shen.x.list.append (shen.x.list.repeat W850 0) (shen.x.bitlen-bytes W848))))))))
+
+(defun shen.x.sha256-IV () (cons 1779033703 (cons 3144134277 (cons 1013904242 (cons 2773480762 (cons 1359893119 (cons 2600822924 (cons 528734635 (cons 1541459225 ())))))))))
+
+(defun shen.x.sha256-K () (cons 1116352408 (cons 1899447441 (cons 3049323471 (cons 3921009573 (cons 961987163 (cons 1508970993 (cons 2453635748 (cons 2870763221 (cons 3624381080 (cons 310598401 (cons 607225278 (cons 1426881987 (cons 1925078388 (cons 2162078206 (cons 2614888103 (cons 3248222580 (cons 3835390401 (cons 4022224774 (cons 264347078 (cons 604807628 (cons 770255983 (cons 1249150122 (cons 1555081692 (cons 1996064986 (cons 2554220882 (cons 2821834349 (cons 2952996808 (cons 3210313671 (cons 3336571891 (cons 3584528711 (cons 113926993 (cons 338241895 (cons 666307205 (cons 773529912 (cons 1294757372 (cons 1396182291 (cons 1695183700 (cons 1986661051 (cons 2177026350 (cons 2456956037 (cons 2730485921 (cons 2820302411 (cons 3259730800 (cons 3345764771 (cons 3516065817 (cons 3600352804 (cons 4094571909 (cons 275423344 (cons 430227734 (cons 506948616 (cons 659060556 (cons 883997877 (cons 958139571 (cons 1322822218 (cons 1537002063 (cons 1747873779 (cons 1955562222 (cons 2024104815 (cons 2227730452 (cons 2361852424 (cons 2428436474 (cons 2756734187 (cons 3204031479 (cons 3329325298 ())))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))
+
+(defun shen.x.ch (V851 V852 V853) (shen.x.u32.xor (shen.x.u32.and V851 V852) (shen.x.u32.and (shen.x.u32.not V851) V853)))
+
+(defun shen.x.maj (V854 V855 V856) (shen.x.u32.xor (shen.x.u32.and V854 V855) (shen.x.u32.xor (shen.x.u32.and V854 V856) (shen.x.u32.and V855 V856))))
+
+(defun shen.x.big-sigma0 (V857) (shen.x.u32.xor (shen.x.u32.rotr V857 2) (shen.x.u32.xor (shen.x.u32.rotr V857 13) (shen.x.u32.rotr V857 22))))
+
+(defun shen.x.big-sigma1 (V858) (shen.x.u32.xor (shen.x.u32.rotr V858 6) (shen.x.u32.xor (shen.x.u32.rotr V858 11) (shen.x.u32.rotr V858 25))))
+
+(defun shen.x.small-sigma0 (V859) (shen.x.u32.xor (shen.x.u32.rotr V859 7) (shen.x.u32.xor (shen.x.u32.rotr V859 18) (shen.x.u32.shr V859 3))))
+
+(defun shen.x.small-sigma1 (V860) (shen.x.u32.xor (shen.x.u32.rotr V860 17) (shen.x.u32.xor (shen.x.u32.rotr V860 19) (shen.x.u32.shr V860 10))))
+
+(defun shen.x.schedule (V861 V862) (cond ((= 64 V862) V861) (true (let W863 (shen.x.list.nth (- V862 15) V861) (let W864 (shen.x.list.nth (- V862 2) V861) (let W865 (shen.x.list.nth (- V862 16) V861) (let W866 (shen.x.list.nth (- V862 7) V861) (let W867 (shen.x.u32.add4 (shen.x.small-sigma1 W864) W866 (shen.x.small-sigma0 W863) W865) (shen.x.schedule (shen.x.list.append V861 (cons W867 ())) (+ V862 1))))))))))
+
+(defun shen.x.sha256-round (V868 V869 V870) (let W871 (shen.x.list.nth 0 V868) (let W872 (shen.x.list.nth 1 V868) (let W873 (shen.x.list.nth 2 V868) (let W874 (shen.x.list.nth 3 V868) (let W875 (shen.x.list.nth 4 V868) (let W876 (shen.x.list.nth 5 V868) (let W877 (shen.x.list.nth 6 V868) (let W878 (shen.x.list.nth 7 V868) (let W879 (shen.x.u32.add5 W878 (shen.x.big-sigma1 W875) (shen.x.ch W875 W876 W877) V869 V870) (let W880 (shen.x.u32.add (shen.x.big-sigma0 W871) (shen.x.maj W871 W872 W873)) (cons (shen.x.u32.add W879 W880) (cons W871 (cons W872 (cons W873 (cons (shen.x.u32.add W874 W879) (cons W875 (cons W876 (cons W877 ())))))))))))))))))))
+
+(defun shen.x.sha256-rounds (V885 V886 V887 V888) (cond ((= 64 V888) V885) (true (shen.x.sha256-rounds (shen.x.sha256-round V885 (shen.x.list.nth V888 V886) (shen.x.list.nth V888 V887)) V886 V887 (+ V888 1)))))
+
+(defun shen.x.add-states (V889 V890) (cond ((and (= () V889) (= () V890)) ()) ((and (cons? V889) (cons? V890)) (cons (shen.x.u32.add (hd V889) (hd V890)) (shen.x.add-states (tl V889) (tl V890)))) (true (simple-error "partial function shen.x.add-states"))))
+
+(defun shen.x.compress (V891 V892) (let W893 (shen.x.bytes->words V892) (let W894 (shen.x.schedule W893 16) (let W895 (shen.x.sha256-rounds V891 (shen.x.sha256-K) W894 0) (shen.x.add-states V891 W895)))))
+
+(defun shen.x.compress-all (V896 V897) (cond ((= () V897) V896) (true (shen.x.compress-all (shen.x.compress V896 (shen.x.list.take 64 V897)) (shen.x.list.drop 64 V897)))))
+
+(defun shen.x.sha256-octets-pure (V898) (if (shen.x.octets-ok? V898) (shen.x.words->bytes (shen.x.compress-all (shen.x.sha256-IV) (shen.x.sha256-pad V898))) (simple-error "shen.x.sha256-octets: expected list of bytes 0..255")))
+
+(defun shen.x.sha256-backend () pure)
+
+(defun shen.x.sha256-octets (V899) (shen.x.sha256-octets-pure V899))
+
+(defun shen.x.hex-digit (V900) (cond ((= 0 V900) "0") ((= 1 V900) "1") ((= 2 V900) "2") ((= 3 V900) "3") ((= 4 V900) "4") ((= 5 V900) "5") ((= 6 V900) "6") ((= 7 V900) "7") ((= 8 V900) "8") ((= 9 V900) "9") ((= 10 V900) "a") ((= 11 V900) "b") ((= 12 V900) "c") ((= 13 V900) "d") ((= 14 V900) "e") ((= 15 V900) "f") (true (simple-error "shen.x.hex-digit"))))
+
+(defun shen.x.quot-small (V901 V902) (if (< V901 V902) 0 (+ 1 (shen.x.quot-small (- V901 V902) V902))))
+
+(defun shen.x.rem-small (V903 V904) (- V903 (* V904 (shen.x.quot-small V903 V904))))
+
+(defun shen.x.byte-hex (V905) (cn (shen.x.hex-digit (shen.x.quot-small V905 16)) (shen.x.hex-digit (shen.x.rem-small V905 16))))
+
+(defun shen.x.octets-hex (V906) (cond ((= () V906) "") ((cons? V906) (cn (shen.x.byte-hex (hd V906)) (shen.x.octets-hex (tl V906)))) (true (simple-error "partial function shen.x.octets-hex"))))
+
+(defun shen.x.sha256-hex (V907) (shen.x.octets-hex (shen.x.sha256-octets V907)))
+
+(defun shen.x.string-length (V908) (shen.x.string-length-h V908 0))
+
+(defun shen.x.string-length-h (V909 V910) (trap-error (do (pos V909 V910) (shen.x.string-length-h V909 (+ V910 1))) (lambda Z911 V910)))
+
+(defun shen.x.string->octets (V912) (shen.x.string->octets-h V912 0 (shen.x.string-length V912)))
+
+(defun shen.x.string->octets-h (V913 V914 V915) (if (>= V914 V915) () (cons (string->n (pos V913 V914)) (shen.x.string->octets-h V913 (+ V914 1) V915))))
+
+(defun main () (do (pr (shen.app (shen.x.sha256-hex (shen.x.string->octets "abc")) "
+" shen.a) (stoutput)) true))
+
+(main)
+

@@ -1,0 +1,24 @@
+(defun shen.x.sha256-backend () pure)
+
+(defun shen.x.sha256-octets (V901) (shen.x.sha256-octets-pure V901))
+
+(defun shen.x.hex-digit (V902) (cond ((= 0 V902) "0") ((= 1 V902) "1") ((= 2 V902) "2") ((= 3 V902) "3") ((= 4 V902) "4") ((= 5 V902) "5") ((= 6 V902) "6") ((= 7 V902) "7") ((= 8 V902) "8") ((= 9 V902) "9") ((= 10 V902) "a") ((= 11 V902) "b") ((= 12 V902) "c") ((= 13 V902) "d") ((= 14 V902) "e") ((= 15 V902) "f") (true (simple-error "shen.x.hex-digit"))))
+
+(defun shen.x.quot-small (V903 V904) (if (< V903 V904) 0 (+ 1 (shen.x.quot-small (- V903 V904) V904))))
+
+(defun shen.x.rem-small (V905 V906) (- V905 (* V906 (shen.x.quot-small V905 V906))))
+
+(defun shen.x.byte-hex (V907) (cn (shen.x.hex-digit (shen.x.quot-small V907 16)) (shen.x.hex-digit (shen.x.rem-small V907 16))))
+
+(defun shen.x.octets-hex (V908) (cond ((= () V908) "") ((cons? V908) (cn (shen.x.byte-hex (hd V908)) (shen.x.octets-hex (tl V908)))) (true (simple-error "partial function shen.x.octets-hex"))))
+
+(defun shen.x.sha256-hex (V909) (shen.x.octets-hex (shen.x.sha256-octets V909)))
+
+(defun shen.x.string-length (V910) (shen.x.string-length-h V910 0))
+
+(defun shen.x.string-length-h (V911 V912) (trap-error (do (pos V911 V912) (shen.x.string-length-h V911 (+ V912 1))) (lambda Z913 V912)))
+
+(defun shen.x.string->octets (V914) (shen.x.string->octets-h V914 0 (shen.x.string-length V914)))
+
+(defun shen.x.string->octets-h (V915 V916 V917) (if (>= V916 V917) () (cons (string->n (pos V915 V916)) (shen.x.string->octets-h V915 (+ V916 1) V917))))
+

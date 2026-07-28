@@ -4,15 +4,19 @@ set -euo pipefail
 ROOT="$(cd "$(dirname "$0")/.." && pwd)"
 cd "$ROOT"
 
-echo "=== 1/3 Bifrost agreement (load-from-source, host backends) ==="
+echo "=== 1/4 Bifrost agreement (load-from-source, host backends) ==="
 "$ROOT/scripts/run-bifrost.sh" "$@"
 
 echo
-echo "=== 2/3 Ratatoskr stage-1 multi-file shake (pure path) ==="
+echo "=== 2/4 Bifrost agreement (SHEN_X_SHA256=pure, pure oracle, +shen-cl) ==="
+"$ROOT/scripts/run-bifrost-pure.sh" "$@"
+
+echo
+echo "=== 3/4 Ratatoskr stage-1 multi-file shake (pure path) ==="
 "$ROOT/scripts/shake.sh"
 
 echo
-echo "=== 3/3 Bifrost --shake deploy path (optional; set SX_SHAKE_DEPLOY=1) ==="
+echo "=== 4/4 Bifrost --shake deploy path (optional; set SX_SHAKE_DEPLOY=1) ==="
 if [[ "${SX_SHAKE_DEPLOY:-}" == "1" ]]; then
   "$ROOT/scripts/run-bifrost-shake.sh" "$@"
 else

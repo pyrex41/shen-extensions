@@ -1,5 +1,0 @@
-(defun main () (do (pr (shen.app (shen.x.sha256-hex (shen.x.string->octets "abc")) "
-" shen.a) (stoutput)) true))
-
-(main)
-

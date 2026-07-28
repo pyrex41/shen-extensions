@@ -18,17 +18,28 @@ export PATH="${HOME}/.local/Homebrew/bin:${PATH}"
 export SHEN_KERNEL_DIR="${SHEN_KERNEL_DIR:-$ROOT/../shen-rust/kernel/klambda}"
 
 # Prepend a tiny bootstrap that sets *home-directory* then loads the user file.
-# Written next to the user program's directory for relative loads inside the app.
+#
+# shen-cl resolves EVERY (load Path) — absolute or not — against
+# *home-directory*, so (load "/abs/file.shen") after (set *home-directory*
+# "$ROOT/") becomes "$ROOT/abs/file.shen" and fails. Load by a path relative
+# to the root we just set instead; that resolves identically on every port.
+# Files outside SHEN_X_ROOT keep the absolute path (fine on go/lua/rust;
+# unsupported on shen-cl by construction).
 bootstrap_for() {
   local user="$1"
-  local abs
+  local abs loadpath
   abs="$(cd "$(dirname "$user")" && pwd)/$(basename "$user")"
+  if [[ "$abs" == "$SHEN_X_ROOT"/* ]]; then
+    loadpath="${abs#"$SHEN_X_ROOT"/}"
+  else
+    loadpath="$abs"
+  fi
   local boot
   boot="$(mktemp "${TMPDIR:-/tmp}/shen-x-boot.XXXXXX")"
   boot="${boot}.shen"
   cat > "$boot" <<EOF
 (set *home-directory* "$SHEN_X_ROOT/")
-(load "$abs")
+(load "$loadpath")
 EOF
   echo "$boot"
 }
@@ -73,6 +84,7 @@ case "$port" in
     ;;
   lua)
     BIN="${SHEN_LUA:-$ROOT/../shen-lua/bin/shen}"
+    [[ "${1:-}" == "script" ]] && shift
     file="${1:?missing .shen}"; shift || true
     boot="$(bootstrap_for "$file")"
     trap 'rm -f "$boot"' EXIT

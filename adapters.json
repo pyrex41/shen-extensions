@@ -2,54 +2,116 @@
   "_comment": [
     "Project-local Bifrost adapters for this machine's sibling checkouts.",
     "Override with $BIFROST_ADAPTERS or per-impl $BIFROST_SHEN_* env vars.",
-    "Copy/adjust paths if your ports live elsewhere."
+    "Copy/adjust paths if your ports live elsewhere.",
+    "default_paths are tried in order, so keep the current checkout first:",
+    "urdr-shen-cl-41.2 is a stale tree predating the shen.x host backend and",
+    "the Tarver S41.2 kernel, and listing it first silently ran the pure",
+    "fallback while the host lane looked green."
   ],
   "shen-cl": {
     "env": "BIFROST_SHEN_CL",
     "default_paths": [
-      "/Users/reuben/projects/urdr-shen-cl-41.2/bin/sbcl/shen",
-      "/Users/reuben/projects/shen-cl/bin/sbcl/shen"
+      "/Users/reuben/projects/shen-cl/bin/sbcl/shen",
+      "/Users/reuben/projects/urdr/.cache/urdr/dependencies/shen-cl/bin/sbcl/shen"
     ],
-    "eval": ["{bin}", "eval", "-q", "-e", "{expr}"],
-    "script": ["{bin}", "script", "{file}"],
-    "version": ["{bin}", "--version"],
-    "repl": ["{bin}"],
+    "eval": [
+      "{bin}",
+      "eval",
+      "-q",
+      "-e",
+      "{expr}"
+    ],
+    "script": [
+      "{bin}",
+      "script",
+      "{file}"
+    ],
+    "version": [
+      "{bin}",
+      "--version"
+    ],
+    "repl": [
+      "{bin}"
+    ],
     "hush_writes_file": true,
     "status": "production"
   },
   "shen-go": {
     "env": "BIFROST_SHEN_GO",
     "default_paths": [
-      "/Users/reuben/projects/shen-go/.bin/shen-go"
+      "/Users/reuben/projects/shen-go/.bin/shen-go",
+      "/Users/reuben/projects/urdr/.cache/urdr/dependencies/shen-go/.bin/shen-go"
     ],
-    "eval": ["{bin}", "eval", "-e", "{expr}"],
-    "script": ["{bin}", "script", "{file}"],
-    "version": ["{bin}", "--version"],
-    "repl": ["{bin}"],
+    "eval": [
+      "{bin}",
+      "eval",
+      "-e",
+      "{expr}"
+    ],
+    "script": [
+      "{bin}",
+      "script",
+      "{file}"
+    ],
+    "version": [
+      "{bin}",
+      "--version"
+    ],
+    "repl": [
+      "{bin}"
+    ],
     "hush_writes_file": true,
     "status": "production"
   },
   "shen-lua": {
     "env": "BIFROST_SHEN_LUA",
     "default_paths": [
-      "/Users/reuben/projects/shen-lua/bin/shen"
+      "/Users/reuben/projects/shen-lua/bin/shen",
+      "/Users/reuben/projects/urdr/.cache/urdr/dependencies/shen-lua/bin/shen"
     ],
-    "eval": ["{bin}", "-e", "{expr}"],
-    "script": ["{bin}", "{file}"],
-    "version": ["{bin}", "--version"],
-    "repl": ["{bin}"],
+    "eval": [
+      "{bin}",
+      "-e",
+      "{expr}"
+    ],
+    "script": [
+      "{bin}",
+      "{file}"
+    ],
+    "version": [
+      "{bin}",
+      "--version"
+    ],
+    "repl": [
+      "{bin}"
+    ],
     "hush_writes_file": true,
     "status": "production"
   },
   "shen-rust": {
     "env": "BIFROST_SHEN_RUST",
     "default_paths": [
-      "/Users/reuben/projects/shen-rust/target/release/shen-rust"
+      "/Users/reuben/projects/shen-rust/target/release/shen-rust",
+      "/Users/reuben/projects/urdr/.cache/urdr/dependencies/shen-rust/target/release/shen-rust"
     ],
-    "eval": ["{bin}", "eval", "-e", "{expr}"],
-    "script": ["{bin}", "script", "{file}"],
-    "version": ["{bin}", "--version"],
-    "repl": ["{bin}"],
+    "eval": [
+      "{bin}",
+      "eval",
+      "-e",
+      "{expr}"
+    ],
+    "script": [
+      "{bin}",
+      "script",
+      "{file}"
+    ],
+    "version": [
+      "{bin}",
+      "--version"
+    ],
+    "repl": [
+      "{bin}"
+    ],
     "hush_writes_file": true,
     "status": "production",
     "_env_note": "Set SHEN_KERNEL_DIR to the port's kernel/klambda when required."

@@ -6,9 +6,9 @@
 set -euo pipefail
 ROOT="$(cd "$(dirname "$0")/.." && pwd)"
 OUT="${1:-$ROOT/.shake/sha256-smoke}"
-RATATOSKR_DIR="${RATATOSKR_DIR:-$ROOT/../ratatoskr}"
+RATATOSKR_DIR="${RATATOSKR_DIR:-$ROOT/../../ratatoskr}"
 export PATH="${HOME}/.local/Homebrew/bin:${PATH}"
-export BIFROST_SHEN_CL="${BIFROST_SHEN_CL:-$ROOT/../urdr-shen-cl-41.2/bin/sbcl/shen}"
+export BIFROST_SHEN_CL="${BIFROST_SHEN_CL:-$ROOT/../../shen-cl/bin/sbcl/shen}"
 export RATATOSKR_HOST="${RATATOSKR_HOST:-$BIFROST_SHEN_CL}"
 export SHEN_X_SHA256=pure
 

@@ -5,20 +5,20 @@
 # Only that case is run (vector suite is not a deploy-path candidate).
 set -euo pipefail
 ROOT="$(cd "$(dirname "$0")/.." && pwd)"
-BIFROST_DIR="${BIFROST_DIR:-$ROOT/../bifrost}"
+BIFROST_DIR="${BIFROST_DIR:-$ROOT/../../bifrost}"
 export BIFROST_ADAPTERS="${BIFROST_ADAPTERS:-$ROOT/adapters.json}"
 export PATH="${HOME}/.local/Homebrew/bin:${PATH}"
-export SHEN_KERNEL_DIR="${SHEN_KERNEL_DIR:-$ROOT/../shen-rust/kernel/klambda}"
-export BIFROST_RATATOSKR_DIR="${BIFROST_RATATOSKR_DIR:-$ROOT/../ratatoskr}"
+export SHEN_KERNEL_DIR="${SHEN_KERNEL_DIR:-$ROOT/../../shen-rust/kernel/klambda}"
+export BIFROST_RATATOSKR_DIR="${BIFROST_RATATOSKR_DIR:-$ROOT/../../ratatoskr}"
 export SHEN_X_SHA256=pure
 # Stage-1 host for ratatoskr (must be a working Shen 41.2). Prefer urdr pin.
-export BIFROST_SHEN_CL="${BIFROST_SHEN_CL:-$ROOT/../urdr-shen-cl-41.2/bin/sbcl/shen}"
+export BIFROST_SHEN_CL="${BIFROST_SHEN_CL:-$ROOT/../../shen-cl/bin/sbcl/shen}"
 export RATATOSKR_HOST="${RATATOSKR_HOST:-$BIFROST_SHEN_CL}"
 # Point ratatoskr stage-2 builders at sibling ports (builders.json dir_env)
-export RATATOSKR_SHEN_GO_DIR="${RATATOSKR_SHEN_GO_DIR:-$ROOT/../shen-go}"
-export RATATOSKR_SHEN_LUA_DIR="${RATATOSKR_SHEN_LUA_DIR:-$ROOT/../shen-lua}"
-export RATATOSKR_SHEN_RUST_DIR="${RATATOSKR_SHEN_RUST_DIR:-$ROOT/../shen-rust}"
-export RATATOSKR_SHEN_CL_DIR="${RATATOSKR_SHEN_CL_DIR:-$ROOT/../shen-cl}"
+export RATATOSKR_SHEN_GO_DIR="${RATATOSKR_SHEN_GO_DIR:-$ROOT/../../shen-go}"
+export RATATOSKR_SHEN_LUA_DIR="${RATATOSKR_SHEN_LUA_DIR:-$ROOT/../../shen-lua}"
+export RATATOSKR_SHEN_RUST_DIR="${RATATOSKR_SHEN_RUST_DIR:-$ROOT/../../shen-rust}"
+export RATATOSKR_SHEN_CL_DIR="${RATATOSKR_SHEN_CL_DIR:-$ROOT/../../shen-cl}"
 
 cd "$ROOT"
 "$ROOT/scripts/bundle-shake-entry.sh"

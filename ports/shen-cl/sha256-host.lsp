@@ -10,7 +10,6 @@
       (progn
         ;; Prefer Homebrew OpenSSL on macOS; fall back to system names.
         (dolist (path '(
-                        "/Users/reuben/.local/Homebrew/opt/openssl@3/lib/libcrypto.dylib"
                         "/opt/homebrew/opt/openssl@3/lib/libcrypto.dylib"
                         "/usr/local/opt/openssl@3/lib/libcrypto.dylib"
                         "libcrypto.dylib"

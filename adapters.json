@@ -11,8 +11,8 @@
   "shen-cl": {
     "env": "BIFROST_SHEN_CL",
     "default_paths": [
-      "/Users/reuben/projects/shen-cl/bin/sbcl/shen",
-      "/Users/reuben/projects/urdr/.cache/urdr/dependencies/shen-cl/bin/sbcl/shen"
+      "../../shen-cl/bin/sbcl/shen",
+      "../shen-cl/bin/sbcl/shen"
     ],
     "eval": [
       "{bin}",
@@ -39,8 +39,8 @@
   "shen-go": {
     "env": "BIFROST_SHEN_GO",
     "default_paths": [
-      "/Users/reuben/projects/shen-go/.bin/shen-go",
-      "/Users/reuben/projects/urdr/.cache/urdr/dependencies/shen-go/.bin/shen-go"
+      "../../shen-go/.bin/shen-go",
+      "../shen-go/.bin/shen-go"
     ],
     "eval": [
       "{bin}",
@@ -66,8 +66,8 @@
   "shen-lua": {
     "env": "BIFROST_SHEN_LUA",
     "default_paths": [
-      "/Users/reuben/projects/shen-lua/bin/shen",
-      "/Users/reuben/projects/urdr/.cache/urdr/dependencies/shen-lua/bin/shen"
+      "../../shen-lua/bin/shen",
+      "../shen-lua/bin/shen"
     ],
     "eval": [
       "{bin}",
@@ -91,8 +91,8 @@
   "shen-rust": {
     "env": "BIFROST_SHEN_RUST",
     "default_paths": [
-      "/Users/reuben/projects/shen-rust/target/release/shen-rust",
-      "/Users/reuben/projects/urdr/.cache/urdr/dependencies/shen-rust/target/release/shen-rust"
+      "../../shen-rust/target/release/shen-rust",
+      "../shen-rust/target/release/shen-rust"
     ],
     "eval": [
       "{bin}",

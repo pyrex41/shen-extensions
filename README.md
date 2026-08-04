@@ -73,7 +73,7 @@ Sibling layout expected:
 export PATH="$HOME/.local/Homebrew/bin:$PATH"
 export SHEN_KERNEL_DIR=$PWD/../shen-rust/kernel/klambda
 # stage-1 host for ratatoskr (working Shen 41.2):
-export BIFROST_SHEN_CL=$PWD/../urdr-shen-cl-41.2/bin/sbcl/shen
+export BIFROST_SHEN_CL=$PWD/../../shen-cl/bin/sbcl/shen
 export RATATOSKR_HOST=$BIFROST_SHEN_CL
 
 make bifrost          # load-from-source agreement (host SHA on go/lua/rust)

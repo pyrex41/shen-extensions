@@ -57,6 +57,72 @@ Force pure on ports that also have host: `SHEN_X_SHA256=pure`.
 | **shen-rust** | `sha2` crate | shipped (`register_hot_overrides`) |
 | **shen-cl** | OpenSSL alien (`ports/shen-cl/sha256-host.lsp`) | image-dependent; pure works but is slow |
 
+## ZMQ API
+
+ZeroMQ messaging with the same shape: the API is written once in Shen
+(`shen/x/zmq.shen`) over a 10-primitive host waist (`ports/README.md`).
+Unlike SHA-256 there is **no pure oracle** — sockets are I/O — so cross-port
+identity is proven by Bifrost agreement transcripts (deterministic
+single-process programs, byte-identical stdout) instead of a pure fallback.
+On ports without a host every call raises the catchable error
+`shen.x.zmq: no host backend on this port (see shen-extensions/ports/README.md)`.
+
+```shen
+(load "shen/x/zmq.shen")
+
+(shen.x.zmq-backend)          \\ host | absent — automatic
+
+\\ push/pull hello (examples/hello-zmq.shen):
+(let Pull (shen.x.zmq.socket pull)
+     B    (shen.x.zmq.bind Pull "inproc://hello")
+     Push (shen.x.zmq.socket push)
+     C    (shen.x.zmq.connect Push "inproc://hello")
+     S    (shen.x.zmq.send-string Push "hello, zmq")
+     R    (shen.x.zmq.recv-string Pull)
+     T    (shen.x.zmq.term)
+  R)                          \\ => "hello, zmq"
+```
+
+```bash
+./scripts/shen-x go script examples/hello-zmq.shen
+```
+
+| Symbol | Meaning |
+| --- | --- |
+| `shen.x.zmq.socket` | `req rep pub sub push pull pair dealer router` → opaque int handle |
+| `shen.x.zmq.bind` / `shen.x.zmq.connect` | endpoint strings; `tcp://127.0.0.1:0` binds ephemeral — read back with `shen.x.zmq.endpoint` |
+| `shen.x.zmq.send` / `shen.x.zmq.recv` | frames = lists of 0..255; multipart is atomic; timeout RETURNS the symbol `shen.x.zmq.timeout` |
+| `shen.x.zmq.send-string` / `shen.x.zmq.send-strings` | string sugar (one frame / multipart) |
+| `shen.x.zmq.recv-string` / `shen.x.zmq.recv-strings` | string sugar; `recv-string` errors on multipart |
+| `shen.x.zmq.set-option` | `rcvtimeo sndtimeo subscribe unsubscribe linger` |
+| `shen.x.zmq.subscribe` / `shen.x.zmq.unsubscribe` | SUB topic sugar (string → octets) |
+| `shen.x.zmq.poll` | handle list + ms (`0` snapshot, `>0` wait, `-1` block) → readable subset |
+| `shen.x.zmq.timeout?` | predicate for the timeout sentinel |
+| `shen.x.zmq.with-socket` | make socket, run body, ALWAYS close (re-raises body errors) |
+| `shen.x.zmq.endpoint` / `shen.x.zmq.close` / `shen.x.zmq.term` | introspect / cleanup (`term` closes everything) |
+| `shen.x.zmq-backend` | `host` \| `absent` |
+
+Kill switch: `SHEN_X_ZMQ=off` (the port installs nothing → backend `absent`).
+All errors are catchable Shen errors prefixed `shen.x.zmq: `.
+
+### Host backends (ideal path)
+
+| Port | Backend | Status |
+| --- | --- | --- |
+| **shen-go** | `github.com/go-zeromq/zmq4` (pure Go, no cgo) | shipped (`kl.InstallShenX`) |
+| **shen-lua** | — | TBD |
+| **shen-rust** | — | TBD |
+| **shen-cl** | — | TBD |
+
+**Agreement cases** (`make bifrost-zmq` — restricted to shen-go until more
+hosts land; they live in `bifrost.zmq.suite.json`, not the shared
+`bifrost.suite.json`, so the default cross-port lanes stay green on ports
+without a zmq host): `zmq-pushpull`, `zmq-reqrep`, `zmq-pubsub`,
+`zmq-timeout`, `zmq-errors`, `zmq-suite` (`tests/run-zmq.shen` → `ALL PASS`). All programs
+are single-process and deterministic: tcp uses `:0` + endpoint readback
+(never printed), PUB/SUB uses a bounded publish+poll retry for the
+slow-joiner race.
+
 ## Bifrost + Ratatoskr (cross-port)
 
 Sibling layout expected:
@@ -77,6 +143,7 @@ export BIFROST_SHEN_CL=$PWD/../../shen-cl/bin/sbcl/shen
 export RATATOSKR_HOST=$BIFROST_SHEN_CL
 
 make bifrost          # load-from-source agreement (host SHA on go/lua/rust)
+make bifrost-zmq      # zmq agreement cases (shen-go only — sole zmq host today)
 make shake            # Ratatoskr stage-1 multi-file pure slice
 make bifrost-shake    # Bifrost --shake: build+run standalone per target
 make check            # bifrost + shake (SX_SHAKE_DEPLOY=1 adds deploy path)
@@ -108,10 +175,13 @@ pure remains the fallback if host is disabled (`SHEN_X_SHA256=pure`).
 shen/x/sha256.shen               public API + host detect + lazy pure
 shen/x/sha256-pure.shen          pure oracle
 shen/x/sha256-portable.shen      pure-only API (shake / standalone)
+shen/x/zmq.shen                  ZMQ API over the 10-prim host waist (host-only)
 programs/sha256-smoke.shen       Bifrost agreement (load + host)
 programs/sha256-smoke-body.shen  multi-file shake body
 programs/sha256-smoke.shake.shen bundled pure entry (Bifrost --shake)
+programs/zmq-*.shen              ZMQ agreement transcripts (5 cases)
 tests/run-sha256.shen            vector suite
+tests/run-zmq.shen               zmq group suite (ALL PASS)
 bifrost.suite.json               load-from-source agreement
 bifrost.shake.suite.json         deploy-path (--shake) suite
 adapters.json                    local port launchers

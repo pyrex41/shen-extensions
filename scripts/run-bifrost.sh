@@ -6,6 +6,11 @@
 #   ./scripts/run-bifrost.sh -impls shen-go,shen-lua  # subset
 #   ./scripts/run-bifrost.sh -only sha256-smoke
 #
+# BIFROST_SUITE overrides the suite manifest (default bifrost.suite.json).
+# The host-only zmq cases live in bifrost.zmq.suite.json (run via make
+# bifrost-zmq) so the default cross-port lanes stay green on ports without a
+# zmq host.
+#
 # Deploy-path (Ratatoskr shake+build+run) is a separate script:
 #   ./scripts/run-bifrost-shake.sh
 set -euo pipefail
@@ -40,4 +45,4 @@ BIFROST="$(resolve_bifrost)"
 if [[ "$*" != *-impls* ]]; then
   set -- -impls shen-go,shen-lua,shen-rust "$@"
 fi
-exec "$BIFROST" -suite "$ROOT/bifrost.suite.json" -heavy "$@"
+exec "$BIFROST" -suite "${BIFROST_SUITE:-$ROOT/bifrost.suite.json}" -heavy "$@"

@@ -10,3 +10,4 @@
 \\ otherwise pure Shen runs (slower, same digests).
 
 (load "shen/x/sha256.shen")
+(load "shen/x/zmq.shen")

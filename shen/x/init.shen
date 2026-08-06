@@ -3,3 +3,4 @@
 \\ entry when *home-directory* is already the extensions root.
 
 (load "shen/x/sha256.shen")
+(load "shen/x/zmq.shen")

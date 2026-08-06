@@ -1,0 +1,64 @@
+{
+  "schema_version": 1,
+  "name": "shen-extensions-zmq",
+  "root": ".",
+  "programs_dir": ".",
+  "default_cwd": ".",
+  "strip_line_prefixes": ["loaded"],
+  "cases": [
+    {
+      "name": "zmq-pushpull",
+      "mode": "script",
+      "program": "programs/zmq-pushpull.shen",
+      "expect": "agreement",
+      "marker": "zmq-pushpull PASS",
+      "heavy": false,
+      "doc": "PUSH/PULL roundtrip over inproc and tcp (ephemeral :0, endpoint read back), single + multipart frames. Host-only: only shen-go ships a zmq host today — run via make bifrost-zmq."
+    },
+    {
+      "name": "zmq-reqrep",
+      "mode": "script",
+      "program": "programs/zmq-reqrep.shen",
+      "expect": "agreement",
+      "marker": "zmq-reqrep PASS",
+      "heavy": false,
+      "doc": "REQ/REP over inproc: 3 request/reply round-trips in one thread. Host-only: only shen-go ships a zmq host today — run via make bifrost-zmq."
+    },
+    {
+      "name": "zmq-pubsub",
+      "mode": "script",
+      "program": "programs/zmq-pubsub.shen",
+      "expect": "agreement",
+      "marker": "zmq-pubsub PASS",
+      "heavy": false,
+      "doc": "PUB/SUB topic-filter proof with slow-joiner publish+poll retry, then rcvtimeo drain proving non-matching topic filtered. Host-only: only shen-go ships a zmq host today — run via make bifrost-zmq."
+    },
+    {
+      "name": "zmq-timeout",
+      "mode": "script",
+      "program": "programs/zmq-timeout.shen",
+      "expect": "agreement",
+      "marker": "zmq-timeout PASS",
+      "heavy": false,
+      "doc": "rcvtimeo returns the shen.x.zmq.timeout symbol; poll 0/positive on empty socket → []; timeout? predicate. Host-only: only shen-go ships a zmq host today — run via make bifrost-zmq."
+    },
+    {
+      "name": "zmq-errors",
+      "mode": "script",
+      "program": "programs/zmq-errors.shen",
+      "expect": "agreement",
+      "marker": "zmq-errors PASS",
+      "heavy": false,
+      "doc": "Contract error strings printed verbatim: unknown type, bad handle, unknown option, malformed send, endpoint-before-bind, recv-string multipart. Host-only: only shen-go ships a zmq host today — run via make bifrost-zmq."
+    },
+    {
+      "name": "zmq-suite",
+      "mode": "script",
+      "program": "tests/run-zmq.shen",
+      "expect": "agreement",
+      "marker": "ALL PASS",
+      "heavy": false,
+      "doc": "Full zmq group suite (pushpull/reqrep/pubsub/timeout/errors) inline, one line per group + ALL PASS. Host-only: only shen-go ships a zmq host today — run via make bifrost-zmq."
+    }
+  ]
+}

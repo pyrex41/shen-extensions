@@ -91,19 +91,27 @@ Set `SHEN_X_SHA256=pure` to force the portable implementation when a native
 backend is installed. The pure implementation is also the reference used to
 verify native results.
 
-### Performance
+### Performance of the current implementations
 
-The host backend is not a small optimization. The pure Shen implementation is
-intended as a portable correctness oracle and fallback; its representation of
-32-bit operations in ordinary Shen data structures is deliberately simple,
-but expensive.
+The pure path is not the original naive prototype. A
+[performance rewrite](https://github.com/pyrex41/shen-extensions/commit/150831c7c70b2a27b8685eb6181338d9478b198b)
+replaced per-operation table construction and slow division with four-byte
+words, memoized constants, bit-list walks, and byte-wise carry addition. At the
+time, that changed the pure vector suite from effectively non-finishing on
+some ports to about 0.11–1.3 seconds across the four ports.
+
+It is also not a theoretical performance ceiling for pure Shen. The current
+hot path still creates intermediate bit lists for 32-bit Boolean operations
+and rotations, and constructs the message schedule with immutable list
+traversals. Fused byte operations, persistent lookup tables, or a more suitable
+schedule representation may improve it further while preserving portability.
 
 This representative local run (2026-08-19) hashed a warmed-up 64-byte message
 with the current port builds on an Apple M4. The benchmark uses 100,000
 iterations for the host path and 10 for the pure path, then compares hashes
 per second:
 
-| Port | Host hashes/sec | Pure hashes/sec | Host speedup |
+| Port | Host hashes/sec | Current pure hashes/sec | Host/current-pure ratio |
 | --- | ---: | ---: | ---: |
 | shen-go | 483,000 | 4.5 | about 108,000x |
 | shen-lua | 124,000 | 8.9 | about 13,900x |
@@ -117,10 +125,12 @@ Run the same comparison on any port with:
 SHEN_X_SHA256=pure ./scripts/shen-x go script programs/sha256-benchmark.shen
 ```
 
-These figures are illustrative rather than general-purpose crypto benchmarks.
-They include conversion between Shen byte lists and host values, and will vary
-with the machine, runtime, and message size. The benchmark is included so the
-comparison can be reproduced instead of treating the table as a fixed claim.
+These figures compare the checked-in implementations; they do not claim that
+pure Shen cannot do better. They are illustrative rather than general-purpose
+crypto benchmarks, include conversion between Shen byte lists and host values,
+and will vary with the machine, runtime, and message size. The benchmark is
+included so the comparison can be reproduced and revisited as the pure path is
+improved.
 
 ## ZeroMQ
 

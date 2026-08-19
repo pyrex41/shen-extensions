@@ -3,6 +3,6 @@
 *.fasl
 .shen-kernel-cache.bin
 .DS_Store
-# ratatoskr intermediate / local KL dumps
+# yggdrasil intermediate / local KL dumps
 programs/*.kl
 shen/**/*.kl

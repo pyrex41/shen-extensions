@@ -99,7 +99,7 @@ case "$port" in
     exec env SHEN_KERNEL_DIR="$SHEN_KERNEL_DIR" "$BIN" script "$boot" "$@"
     ;;
   cl)
-    BIN="${SHEN_CL:-$ROOT/../../shen-cl/bin/sbcl/shen}"
+    BIN="${SHEN_CL:-$ROOT/../shen-cl/bin/sbcl/shen}"
     [[ "${1:-}" == "script" ]] && shift
     file="${1:?missing .shen}"; shift || true
     boot="$(bootstrap_for "$file")"

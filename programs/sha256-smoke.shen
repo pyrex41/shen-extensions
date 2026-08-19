@@ -1,4 +1,4 @@
-\\ Minimal Ratatoskr shake target: load pure SHA-256, hash "abc", print hex.
+\\ Minimal Yggdrasil shake target: load pure SHA-256, hash "abc", print hex.
 \\ Self-contained entry for stage-1 shake + deploy-path parity.
 
 (load "shen/x/sha256.shen")

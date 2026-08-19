@@ -1,21 +1,21 @@
 #!/usr/bin/env bash
-# Stage-1 Ratatoskr multi-file shake (pure path).
+# Stage-1 Yggdrasil multi-file shake (pure path).
 #
-# Ratatoskr does not follow (load …). We pass pure + portable + body so the
+# Yggdrasil does not follow (load …). We pass pure + portable + body so the
 # full call graph is in the user KL footprint.
 set -euo pipefail
 ROOT="$(cd "$(dirname "$0")/.." && pwd)"
 OUT="${1:-$ROOT/.shake/sha256-smoke}"
-RATATOSKR_DIR="${RATATOSKR_DIR:-$ROOT/../../ratatoskr}"
+YGGDRASIL_DIR="${YGGDRASIL_DIR:-$ROOT/../yggdrasil}"
 export PATH="${HOME}/.local/Homebrew/bin:${PATH}"
-export BIFROST_SHEN_CL="${BIFROST_SHEN_CL:-$ROOT/../../shen-cl/bin/sbcl/shen}"
-export RATATOSKR_HOST="${RATATOSKR_HOST:-$BIFROST_SHEN_CL}"
+export BIFROST_SHEN_CL="${BIFROST_SHEN_CL:-$ROOT/../shen-cl/bin/sbcl/shen}"
+export YGGDRASIL_HOST="${YGGDRASIL_HOST:-$BIFROST_SHEN_CL}"
 export SHEN_X_SHA256=pure
 
 PURE="$ROOT/shen/x/sha256-pure.shen"
 PORTABLE="$ROOT/shen/x/sha256-portable.shen"
 BODY="$ROOT/programs/sha256-smoke-body.shen"
-for f in "$PURE" "$PORTABLE" "$BODY" "$RATATOSKR_DIR/ratatoskr.shen"; do
+for f in "$PURE" "$PORTABLE" "$BODY" "$YGGDRASIL_DIR/yggdrasil.shen"; do
   [[ -f "$f" ]] || { echo "missing $f" >&2; exit 1; }
 done
 
@@ -23,32 +23,32 @@ mkdir -p "$OUT" "$ROOT/.bin"
 rm -rf "$OUT"
 mkdir -p "$OUT"
 
-HOST="$RATATOSKR_HOST"
+HOST="$YGGDRASIL_HOST"
 if [[ ! -x "$HOST" ]]; then
-  echo "RATATOSKR_HOST not executable: $HOST" >&2
+  echo "YGGDRASIL_HOST not executable: $HOST" >&2
   echo "falling back to single-file CLI shake" >&2
   "$ROOT/scripts/bundle-shake-entry.sh" "$ROOT/programs/sha256-smoke.shake.shen"
-  R=ratatoskr
-  if ! command -v ratatoskr >/dev/null 2>&1; then
-    if [[ -x /tmp/ratatoskr-bin ]]; then R=/tmp/ratatoskr-bin
-    else (cd "$RATATOSKR_DIR" && go build -o "$ROOT/.bin/ratatoskr" .) && R="$ROOT/.bin/ratatoskr"
+  R=yggdrasil
+  if ! command -v yggdrasil >/dev/null 2>&1; then
+    if [[ -x /tmp/yggdrasil-bin ]]; then R=/tmp/yggdrasil-bin
+    else (cd "$YGGDRASIL_DIR" && go build -o "$ROOT/.bin/yggdrasil" .) && R="$ROOT/.bin/yggdrasil"
     fi
   fi
   "$R" shake "$ROOT/programs/sha256-smoke.shake.shen" "$OUT"
 else
   DRV="$(mktemp "${TMPDIR:-/tmp}/sx-shake.XXXXXX")"
   DRV="${DRV}.shen"
-  # Absolute paths in the file list so host cwd = ratatoskr is fine.
+  # Absolute paths in the file list so host cwd = yggdrasil is fine.
   cat > "$DRV" <<EOF
-(load "ratatoskr.shen")
-(ratatoskr.shake
+(load "yggdrasil.shen")
+(yggdrasil.shake
   ["$PURE"
    "$PORTABLE"
    "$BODY"]
   "$OUT")
 EOF
-  echo "multi-file shake via $HOST (cwd=$RATATOSKR_DIR)"
-  (cd "$RATATOSKR_DIR" && "$HOST" script "$DRV")
+  echo "multi-file shake via $HOST (cwd=$YGGDRASIL_DIR)"
+  (cd "$YGGDRASIL_DIR" && "$HOST" script "$DRV")
   rm -f "$DRV"
 fi
 

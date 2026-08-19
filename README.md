@@ -13,7 +13,7 @@ Cross-repo path:
 | Contract + pure oracle | this repo | `shen.x.sha256-*` API and FIPS vectors |
 | Host backends | each Shen port | ideal native path |
 | Agreement | [Bifrost](https://github.com/pyrex41/bifrost) | run suite across ports |
-| Shake / deploy slice | [Ratatoskr](https://github.com/pyrex41/ratatoskr) | tree-shake + standalone build |
+| Shake / deploy slice | [Yggdrasil](https://github.com/pyrex41/yggdrasil) | tree-shake + standalone build |
 
 ## User model (Shen only)
 
@@ -123,7 +123,7 @@ are single-process and deterministic: tcp uses `:0` + endpoint readback
 (never printed), PUB/SUB uses a bounded publish+poll retry for the
 slow-joiner race.
 
-## Bifrost + Ratatoskr (cross-port)
+## Bifrost + Yggdrasil (cross-port)
 
 Sibling layout expected:
 
@@ -131,20 +131,20 @@ Sibling layout expected:
 ~/projects/
   shen-extensions/   ← this repo
   bifrost/
-  ratatoskr/
+  yggdrasil/
   shen-go/  shen-lua/  shen-rust/  (host backends)
 ```
 
 ```bash
 export PATH="$HOME/.local/Homebrew/bin:$PATH"
 export SHEN_KERNEL_DIR=$PWD/../shen-rust/kernel/klambda
-# stage-1 host for ratatoskr (working Shen 41.2):
-export BIFROST_SHEN_CL=$PWD/../../shen-cl/bin/sbcl/shen
-export RATATOSKR_HOST=$BIFROST_SHEN_CL
+# stage-1 host for yggdrasil (working Shen 41.2):
+export BIFROST_SHEN_CL=$PWD/../shen-cl/bin/sbcl/shen
+export YGGDRASIL_HOST=$BIFROST_SHEN_CL
 
 make bifrost          # load-from-source agreement (host SHA on go/lua/rust)
 make bifrost-zmq      # zmq agreement cases (shen-go only — sole zmq host today)
-make shake            # Ratatoskr stage-1 multi-file pure slice
+make shake            # Yggdrasil stage-1 multi-file pure slice
 make bifrost-shake    # Bifrost --shake: build+run standalone per target
 make check            # bifrost + shake (SX_SHAKE_DEPLOY=1 adds deploy path)
 ```
@@ -152,7 +152,7 @@ make check            # bifrost + shake (SX_SHAKE_DEPLOY=1 adds deploy path)
 | Path | What it proves | Entry |
 | --- | --- | --- |
 | **Bifrost agreement** | same stdout on every port (host or pure) | `bifrost.suite.json` |
-| **Ratatoskr stage-1** | pure call graph → `kernel.kl` + user KL | multi-file: pure + portable + body |
+| **Yggdrasil stage-1** | pure call graph → `kernel.kl` + user KL | multi-file: pure + portable + body |
 | **Bifrost `--shake`** | standalone artifacts agree (deploy path) | `bifrost.shake.suite.json` |
 
 **Agreement cases** (`make bifrost`):
@@ -164,7 +164,7 @@ make check            # bifrost + shake (SX_SHAKE_DEPLOY=1 adds deploy path)
 
 - `sha256-smoke-deploy` — self-contained **pure** bundle
 
-**Why two smoke entries?** Ratatoskr does not follow `(load …)`, so deploy uses
+**Why two smoke entries?** Yggdrasil does not follow `(load …)`, so deploy uses
 a multi-file / bundled entry that includes pure **and** host-preferring API.
 Stage-2 builders inject host crypto (go/lua/rust) so standalone runs stay fast;
 pure remains the fallback if host is disabled (`SHEN_X_SHA256=pure`).

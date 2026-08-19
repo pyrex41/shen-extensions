@@ -1,4 +1,4 @@
-\\ Public API for multi-file Ratatoskr / standalone artifacts.
+\\ Public API for multi-file Yggdrasil / standalone artifacts.
 \\ Prefer host when the port installed shen.x.sha256-octets-host (and set
 \\ shen.x.*sha256-backend* to host); otherwise pure (load sha256-pure.shen first).
 \\

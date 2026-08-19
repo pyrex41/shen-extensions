@@ -13,7 +13,7 @@
       "expect": "agreement",
       "marker": "ba7816bf8f01cfea414140de5dae2223b00361a396177a9cb410ff61f20015ad",
       "heavy": true,
-      "doc": "Self-contained pure SHA smoke for Bifrost --shake (Ratatoskr build+run per target, byte-identical stdout)."
+      "doc": "Self-contained pure SHA smoke for Bifrost --shake (Yggdrasil build+run per target, byte-identical stdout)."
     }
   ]
 }

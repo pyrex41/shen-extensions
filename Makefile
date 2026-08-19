@@ -1,4 +1,4 @@
-# shen-extensions — Bifrost agreement + Ratatoskr shake
+# shen-extensions — Bifrost agreement + Yggdrasil shake
 .PHONY: help test bifrost bifrost-pure bifrost-zmq bifrost-shake shake bundle check
 
 help:
@@ -6,7 +6,7 @@ help:
 	@echo "  make bifrost         # cross-port agreement (go/lua/rust host path)"
 	@echo "  make bifrost-pure    # agreement with SHEN_X_SHA256=pure (go/lua/rust/cl, pure oracle)"
 	@echo "  make bifrost-zmq     # zmq agreement cases (shen-go only — sole zmq host today)"
-	@echo "  make shake           # Ratatoskr stage-1 multi-file pure shake"
+	@echo "  make shake           # Yggdrasil stage-1 multi-file pure shake"
 	@echo "  make bifrost-shake   # Bifrost --shake deploy-path (standalone artifacts)"
 	@echo "  make bundle          # regenerate programs/sha256-smoke.shake.shen"
 	@echo "  make check           # bifrost + bifrost-pure + shake (SX_SHAKE_DEPLOY=1 for deploy too)"

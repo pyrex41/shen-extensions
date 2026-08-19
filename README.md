@@ -80,16 +80,47 @@ The public API is:
 
 Backend support:
 
-| Port | Backend used by default |
-| --- | --- |
-| shen-go | Go `crypto/sha256` |
-| shen-lua | OpenSSL `libcrypto` through FFI |
-| shen-rust | Rust `sha2` crate |
-| shen-cl | OpenSSL alien when installed; otherwise pure Shen |
+| Port | Backend used by default | Implementation |
+| --- | --- | --- |
+| shen-go | Go `crypto/sha256` | [`kl/shenx_sha256.go`](https://github.com/pyrex41/shen-go/blob/master/kl/shenx_sha256.go) |
+| shen-lua | OpenSSL `libcrypto` through FFI | [`prims.lua`](https://github.com/pyrex41/shen-lua/blob/main/prims.lua#L1111-L1175) |
+| shen-rust | Rust `sha2` crate | [`primitives.rs`](https://github.com/pyrex41/shen-rust/blob/main/crates/shen-rust/src/primitives.rs#L647-L685) |
+| shen-cl | Self-contained optimized Common Lisp | [`src/sha256.lsp`](https://github.com/pyrex41/shen-cl/blob/master/src/sha256.lsp) |
 
 Set `SHEN_X_SHA256=pure` to force the portable implementation when a native
 backend is installed. The pure implementation is also the reference used to
 verify native results.
+
+### Performance
+
+The host backend is not a small optimization. The pure Shen implementation is
+intended as a portable correctness oracle and fallback; its representation of
+32-bit operations in ordinary Shen data structures is deliberately simple,
+but expensive.
+
+This representative local run (2026-08-19) hashed a warmed-up 64-byte message
+with the current port builds on an Apple M4. The benchmark uses 100,000
+iterations for the host path and 10 for the pure path, then compares hashes
+per second:
+
+| Port | Host hashes/sec | Pure hashes/sec | Host speedup |
+| --- | ---: | ---: | ---: |
+| shen-go | 483,000 | 4.5 | about 108,000x |
+| shen-lua | 124,000 | 8.9 | about 13,900x |
+| shen-rust | 309,000 | 8.5 | about 36,200x |
+| shen-cl | 414,000 | 59.9 | about 6,900x |
+
+Run the same comparison on any port with:
+
+```bash
+./scripts/shen-x go script programs/sha256-benchmark.shen
+SHEN_X_SHA256=pure ./scripts/shen-x go script programs/sha256-benchmark.shen
+```
+
+These figures are illustrative rather than general-purpose crypto benchmarks.
+They include conversion between Shen byte lists and host values, and will vary
+with the machine, runtime, and message size. The benchmark is included so the
+comparison can be reproduced instead of treating the table as a fixed claim.
 
 ## ZeroMQ
 
@@ -124,9 +155,11 @@ and `router`. Binary frames are lists of bytes. Timeouts return the symbol
 `shen.x.zmq: `.
 
 shen-go currently supplies the only ZMQ backend, using the pure-Go
-`github.com/go-zeromq/zmq4` package. Other ports report an absent backend and
-raise a clear error when a ZMQ operation is attempted. Set `SHEN_X_ZMQ=off` to
-disable backend installation explicitly.
+`github.com/go-zeromq/zmq4` package; its implementation is
+[`kl/shenx_zmq.go`](https://github.com/pyrex41/shen-go/blob/master/kl/shenx_zmq.go).
+Other ports report an absent backend and raise a clear error when a ZMQ
+operation is attempted. Set `SHEN_X_ZMQ=off` to disable backend installation
+explicitly.
 
 See [`examples/hello-zmq.shen`](examples/hello-zmq.shen) for a runnable example
 and [`ports/README.md`](ports/README.md) for the host-backend contract.
@@ -182,6 +215,7 @@ examples/                         small runnable programs
 tests/                            extension test suites
 ports/                            host-backend contracts and adapters
 programs/                         Bifrost and Yggdrasil test programs
+programs/sha256-benchmark.shen    reproducible host-versus-pure comparison
 scripts/shen-x                    portable launcher wrapper
 scripts/run-bifrost*.sh           cross-port verification
 scripts/shake.sh                  Yggdrasil standalone-build check

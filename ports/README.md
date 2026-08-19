@@ -18,7 +18,7 @@ User Shen never names the host function. They only call:
 (shen.x.sha256-hex (shen.x.string->octets "…"))
 ```
 
-## Contract (Ratatoskr shaken / standalone)
+## Contract (Yggdrasil shaken / standalone)
 
 Stage-2 builders must install the same host binding **after** the shaken
 kernel loads and **before** user chunks run, so pure-path user KL that does
@@ -33,8 +33,8 @@ hits native crypto.
 
 | Port | Live install | Shaken install |
 | --- | --- | --- |
-| shen-go | `kl.InstallShenX()` from `cmd/shen` | `InstallShenX()` in generated `main.go` (ratatoskr-build) |
-| shen-lua | end of `prims.install_native_stdlib` | same (ratatoskr-build already calls `install_native_stdlib`) |
+| shen-go | `kl.InstallShenX()` from `cmd/shen` | `InstallShenX()` in generated `main.go` (yggdrasil-build) |
+| shen-lua | end of `prims.install_native_stdlib` | same (yggdrasil-build already calls `install_native_stdlib`) |
 | shen-rust | `register_shenx` via hot overrides | same (`boot_from_kl_source` → hot overrides) |
 | shen-cl | `ports/shen-cl/sha256-host.lsp` | TBD (image must export load-lisp / bake host) |
 

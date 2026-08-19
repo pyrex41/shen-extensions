@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# Full local gate: Bifrost agreement + Ratatoskr stage-1 + optional deploy shake.
+# Full local gate: Bifrost agreement + Yggdrasil stage-1 + optional deploy shake.
 set -euo pipefail
 ROOT="$(cd "$(dirname "$0")/.." && pwd)"
 cd "$ROOT"
@@ -12,7 +12,7 @@ echo "=== 2/4 Bifrost agreement (SHEN_X_SHA256=pure, pure oracle, +shen-cl) ==="
 "$ROOT/scripts/run-bifrost-pure.sh" "$@"
 
 echo
-echo "=== 3/4 Ratatoskr stage-1 multi-file shake (pure path) ==="
+echo "=== 3/4 Yggdrasil stage-1 multi-file shake (pure path) ==="
 "$ROOT/scripts/shake.sh"
 
 echo

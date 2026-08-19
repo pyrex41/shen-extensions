@@ -11,7 +11,7 @@
 # bifrost-zmq) so the default cross-port lanes stay green on ports without a
 # zmq host.
 #
-# Deploy-path (Ratatoskr shake+build+run) is a separate script:
+# Deploy-path (Yggdrasil shake+build+run) is a separate script:
 #   ./scripts/run-bifrost-shake.sh
 set -euo pipefail
 ROOT="$(cd "$(dirname "$0")/.." && pwd)"
@@ -19,8 +19,8 @@ BIFROST_DIR="${BIFROST_DIR:-$ROOT/../bifrost}"
 export BIFROST_ADAPTERS="${BIFROST_ADAPTERS:-$ROOT/adapters.json}"
 export PATH="${HOME}/.local/Homebrew/bin:${PATH}"
 export SHEN_KERNEL_DIR="${SHEN_KERNEL_DIR:-$ROOT/../shen-rust/kernel/klambda}"
-export BIFROST_RATATOSKR_DIR="${BIFROST_RATATOSKR_DIR:-$ROOT/../ratatoskr}"
-export RATATOSKR_BIN="${RATATOSKR_BIN:-}"
+export BIFROST_YGGDRASIL_DIR="${BIFROST_YGGDRASIL_DIR:-$ROOT/../yggdrasil}"
+export YGGDRASIL_BIN="${YGGDRASIL_BIN:-}"
 
 cd "$ROOT"
 

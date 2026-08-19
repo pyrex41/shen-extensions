@@ -1,199 +1,193 @@
 # shen-extensions
 
-Optional, portable Shen extensions with **per-port ideal backends** and
-**cross-port identity proofs**.
+Portable, opt-in libraries for Shen programs.
 
-Same Shen API → same output on every port. Host acceleration (OpenSSL,
-`crypto/sha256`, Rust `sha2`, …) is optional; pure Shen remains the oracle.
+This repository provides stable `shen.x.*` APIs for capabilities that are not
+part of core Shen. A program uses the same Shen functions on every port; each
+port can supply an efficient native backend where one is available.
 
-Cross-repo path:
+The repository currently contains two extensions:
 
-| Layer | Tool | Role |
+| Extension | What it provides | Availability |
 | --- | --- | --- |
-| Contract + pure oracle | this repo | `shen.x.sha256-*` API and FIPS vectors |
-| Host backends | each Shen port | ideal native path |
-| Agreement | [Bifrost](https://github.com/pyrex41/bifrost) | run suite across ports |
-| Shake / deploy slice | [Yggdrasil](https://github.com/pyrex41/yggdrasil) | tree-shake + standalone build |
+| [SHA-256](#sha-256) | Byte and hexadecimal SHA-256 digests | Every supported port through a native backend or pure Shen fallback |
+| [ZeroMQ](#zeromq) | Sockets, messaging, polling, and timeouts | Ports with a ZMQ backend; currently shen-go |
 
-## User model (Shen only)
+`shen-extensions` runs on top of an existing Shen implementation. It is not a
+new Shen runtime or a replacement for a port.
+
+## Quick start
+
+Run Shen with this repository as its home directory, then load every extension:
 
 ```shen
-\\ From the extensions repo root, or after setting *home-directory* there:
 (load "load.shen")
+```
+
+You can also load one extension directly:
+
+```shen
+(load "shen/x/sha256.shen")
+(load "shen/x/zmq.shen")
+```
+
+The included wrapper sets the Shen home directory for sibling port checkouts:
+
+```bash
+./scripts/shen-x go script examples/hello-sha.shen
+./scripts/shen-x lua script examples/hello-sha.shen
+./scripts/shen-x rust script examples/hello-sha.shen
+./scripts/shen-x cl script examples/hello-sha.shen
+```
+
+Override a launcher with `SHEN_GO`, `SHEN_LUA`, `SHEN_RUST`, or `SHEN_CL` if
+your ports are installed elsewhere.
+
+## How portability works
+
+Application code only calls the public `shen.x.*` API:
+
+```text
+Shen program ──> portable shen.x API ──> native port backend, when installed
+                                  └────> pure Shen fallback, when provided
+```
+
+The port-specific details stay behind that API. SHA-256 includes a pure Shen
+implementation, so it works even when a port has no native crypto backend.
+ZeroMQ performs host I/O and has no meaningful pure fallback; on an unsupported
+port its functions raise a catchable Shen error instead.
+
+## SHA-256
+
+```shen
+(load "shen/x/sha256.shen")
 
 (shen.x.sha256-hex (shen.x.string->octets "abc"))
 \\ => ba7816bf8f01cfea414140de5dae2223b00361a396177a9cb410ff61f20015ad
 
-(shen.x.sha256-backend)   \\ host | pure — automatic
+(shen.x.sha256-backend)
+\\ => host or pure
 ```
 
-No per-port `#ifdef`. If the port installed a native host, digests are fast;
-otherwise pure Shen runs with **identical** digests.
-
-```bash
-# convenience wrapper sets *home-directory* for you:
-./scripts/shen-x go script examples/hello-sha.shen
-./scripts/shen-x lua examples/hello-sha.shen
-./scripts/shen-x rust script examples/hello-sha.shen
-```
-
-## SHA-256 API
+The public API is:
 
 | Symbol | Meaning |
 | --- | --- |
-| `shen.x.sha256-octets` | digest: list of 0..255 → 32 bytes |
-| `shen.x.sha256-hex` | lowercase 64-char hex |
-| `shen.x.sha256-octets-host` | port-supplied host primitive (optional) |
-| `shen.x.sha256-octets-pure` | pure Shen oracle (`sha256-pure.shen`, lazy-loaded) |
+| `shen.x.sha256-octets` | Hash a list of bytes (`0..255`) and return 32 bytes |
+| `shen.x.sha256-hex` | Render a digest as 64 lowercase hexadecimal characters |
+| `shen.x.string->octets` | Convert a Shen string to bytes |
+| `shen.x.sha256-backend` | Report `host` or `pure` |
 
-Force pure on ports that also have host: `SHEN_X_SHA256=pure`.
+Backend support:
 
-### Host backends (ideal path)
+| Port | Backend used by default |
+| --- | --- |
+| shen-go | Go `crypto/sha256` |
+| shen-lua | OpenSSL `libcrypto` through FFI |
+| shen-rust | Rust `sha2` crate |
+| shen-cl | OpenSSL alien when installed; otherwise pure Shen |
 
-| Port | Backend | Status |
-| --- | --- | --- |
-| **shen-go** | `crypto/sha256` | shipped (`kl.InstallShenX`) |
-| **shen-lua** | OpenSSL `libcrypto` via FFI | shipped (`prims.install_native_stdlib`) |
-| **shen-rust** | `sha2` crate | shipped (`register_hot_overrides`) |
-| **shen-cl** | OpenSSL alien (`ports/shen-cl/sha256-host.lsp`) | image-dependent; pure works but is slow |
+Set `SHEN_X_SHA256=pure` to force the portable implementation when a native
+backend is installed. The pure implementation is also the reference used to
+verify native results.
 
-## ZMQ API
-
-ZeroMQ messaging with the same shape: the API is written once in Shen
-(`shen/x/zmq.shen`) over a 10-primitive host waist (`ports/README.md`).
-Unlike SHA-256 there is **no pure oracle** — sockets are I/O — so cross-port
-identity is proven by Bifrost agreement transcripts (deterministic
-single-process programs, byte-identical stdout) instead of a pure fallback.
-On ports without a host every call raises the catchable error
-`shen.x.zmq: no host backend on this port (see shen-extensions/ports/README.md)`.
+## ZeroMQ
 
 ```shen
 (load "shen/x/zmq.shen")
 
-(shen.x.zmq-backend)          \\ host | absent — automatic
-
-\\ push/pull hello (examples/hello-zmq.shen):
 (let Pull (shen.x.zmq.socket pull)
-     B    (shen.x.zmq.bind Pull "inproc://hello")
+     Bound (shen.x.zmq.bind Pull "inproc://hello")
      Push (shen.x.zmq.socket push)
-     C    (shen.x.zmq.connect Push "inproc://hello")
-     S    (shen.x.zmq.send-string Push "hello, zmq")
-     R    (shen.x.zmq.recv-string Pull)
-     T    (shen.x.zmq.term)
-  R)                          \\ => "hello, zmq"
+     Connected (shen.x.zmq.connect Push "inproc://hello")
+     Sent (shen.x.zmq.send-string Push "hello, zmq")
+     Message (shen.x.zmq.recv-string Pull)
+     Terminated (shen.x.zmq.term)
+  Message)
+\\ => "hello, zmq"
 ```
 
-```bash
-./scripts/shen-x go script examples/hello-zmq.shen
-```
+The API covers:
 
-| Symbol | Meaning |
+| Area | Symbols |
 | --- | --- |
-| `shen.x.zmq.socket` | `req rep pub sub push pull pair dealer router` → opaque int handle |
-| `shen.x.zmq.bind` / `shen.x.zmq.connect` | endpoint strings; `tcp://127.0.0.1:0` binds ephemeral — read back with `shen.x.zmq.endpoint` |
-| `shen.x.zmq.send` / `shen.x.zmq.recv` | frames = lists of 0..255; multipart is atomic; timeout RETURNS the symbol `shen.x.zmq.timeout` |
-| `shen.x.zmq.send-string` / `shen.x.zmq.send-strings` | string sugar (one frame / multipart) |
-| `shen.x.zmq.recv-string` / `shen.x.zmq.recv-strings` | string sugar; `recv-string` errors on multipart |
-| `shen.x.zmq.set-option` | `rcvtimeo sndtimeo subscribe unsubscribe linger` |
-| `shen.x.zmq.subscribe` / `shen.x.zmq.unsubscribe` | SUB topic sugar (string → octets) |
-| `shen.x.zmq.poll` | handle list + ms (`0` snapshot, `>0` wait, `-1` block) → readable subset |
-| `shen.x.zmq.timeout?` | predicate for the timeout sentinel |
-| `shen.x.zmq.with-socket` | make socket, run body, ALWAYS close (re-raises body errors) |
-| `shen.x.zmq.endpoint` / `shen.x.zmq.close` / `shen.x.zmq.term` | introspect / cleanup (`term` closes everything) |
-| `shen.x.zmq-backend` | `host` \| `absent` |
+| Sockets | `shen.x.zmq.socket`, `bind`, `connect`, `endpoint` |
+| Messages | `send`, `recv`, `send-string`, `recv-string`, multipart variants |
+| Readiness | `poll`, `shen.x.zmq.timeout`, `timeout?` |
+| Options | `set-option`, `subscribe`, `unsubscribe` |
+| Cleanup | `close`, `term`, `with-socket` |
+| Status | `shen.x.zmq-backend` returns `host` or `absent` |
 
-Kill switch: `SHEN_X_ZMQ=off` (the port installs nothing → backend `absent`).
-All errors are catchable Shen errors prefixed `shen.x.zmq: `.
+Socket types are `req`, `rep`, `pub`, `sub`, `push`, `pull`, `pair`, `dealer`,
+and `router`. Binary frames are lists of bytes. Timeouts return the symbol
+`shen.x.zmq.timeout`; other failures are catchable errors prefixed with
+`shen.x.zmq: `.
 
-### Host backends (ideal path)
+shen-go currently supplies the only ZMQ backend, using the pure-Go
+`github.com/go-zeromq/zmq4` package. Other ports report an absent backend and
+raise a clear error when a ZMQ operation is attempted. Set `SHEN_X_ZMQ=off` to
+disable backend installation explicitly.
 
-| Port | Backend | Status |
-| --- | --- | --- |
-| **shen-go** | `github.com/go-zeromq/zmq4` (pure Go, no cgo) | shipped (`kl.InstallShenX`) |
-| **shen-lua** | — | TBD |
-| **shen-rust** | — | TBD |
-| **shen-cl** | — | TBD |
+See [`examples/hello-zmq.shen`](examples/hello-zmq.shen) for a runnable example
+and [`ports/README.md`](ports/README.md) for the host-backend contract.
 
-**Agreement cases** (`make bifrost-zmq` — restricted to shen-go until more
-hosts land; they live in `bifrost.zmq.suite.json`, not the shared
-`bifrost.suite.json`, so the default cross-port lanes stay green on ports
-without a zmq host): `zmq-pushpull`, `zmq-reqrep`, `zmq-pubsub`,
-`zmq-timeout`, `zmq-errors`, `zmq-suite` (`tests/run-zmq.shen` → `ALL PASS`). All programs
-are single-process and deterministic: tcp uses `:0` + endpoint readback
-(never printed), PUB/SUB uses a bounded publish+poll retry for the
-slow-joiner race.
+## Tests and cross-port verification
 
-## Bifrost + Yggdrasil (cross-port)
+The ordinary tests exercise the public API. Bifrost and Yggdrasil are
+maintainer tools used to prove that the same extension behaves consistently
+across ports and in standalone builds; they are not required by applications
+that use this repository.
 
-Sibling layout expected:
+| Command | What it checks |
+| --- | --- |
+| `./scripts/shen-x cl script tests/run-sha256.shen` | SHA-256 reference vectors on one port |
+| `make bifrost` | Identical SHA-256 results across available ports |
+| `make bifrost-zmq` | Deterministic ZMQ behavior on ports with a backend |
+| `make shake` | A standalone SHA-256 slice generated by Yggdrasil |
+| `make bifrost-shake` | Cross-port agreement of standalone artifacts |
+| `make check` | The full local integration gate |
+
+The integration scripts expect sibling checkouts by default:
 
 ```text
 ~/projects/
-  shen-extensions/   ← this repo
+  shen-extensions/
   bifrost/
   yggdrasil/
-  shen-go/  shen-lua/  shen-rust/  (host backends)
+  shen-cl/
+  shen-go/
+  shen-lua/
+  shen-rust/
 ```
 
-```bash
-export PATH="$HOME/.local/Homebrew/bin:$PATH"
-export SHEN_KERNEL_DIR=$PWD/../shen-rust/kernel/klambda
-# stage-1 host for yggdrasil (working Shen 41.2):
-export BIFROST_SHEN_CL=$PWD/../shen-cl/bin/sbcl/shen
-export YGGDRASIL_HOST=$BIFROST_SHEN_CL
+Their locations can be overridden with the `BIFROST_*`, `YGGDRASIL_*`, and
+`SHEN_*` environment variables used by the scripts.
 
-make bifrost          # load-from-source agreement (host SHA on go/lua/rust)
-make bifrost-zmq      # zmq agreement cases (shen-go only — sole zmq host today)
-make shake            # Yggdrasil stage-1 multi-file pure slice
-make bifrost-shake    # Bifrost --shake: build+run standalone per target
-make check            # bifrost + shake (SX_SHAKE_DEPLOY=1 adds deploy path)
-```
+## Adding a backend
 
-| Path | What it proves | Entry |
-| --- | --- | --- |
-| **Bifrost agreement** | same stdout on every port (host or pure) | `bifrost.suite.json` |
-| **Yggdrasil stage-1** | pure call graph → `kernel.kl` + user KL | multi-file: pure + portable + body |
-| **Bifrost `--shake`** | standalone artifacts agree (deploy path) | `bifrost.shake.suite.json` |
+A port backend implements the small host-facing contract and marks that
+backend as available. User programs continue to call only the public Shen API.
 
-**Agreement cases** (`make bifrost`):
+The exact primitive names, arities, return values, error behavior, and
+installation points are documented in [`ports/README.md`](ports/README.md).
 
-- `sha256-vectors-agreement` — NIST/FIPS vectors, marker `ALL PASS`
-- `sha256-smoke` — `"abc"` via `(load "shen/x/sha256.shen")` (**host** when present)
+## Repository layout
 
-**Deploy case** (`make bifrost-shake`):
-
-- `sha256-smoke-deploy` — self-contained **pure** bundle
-
-**Why two smoke entries?** Yggdrasil does not follow `(load …)`, so deploy uses
-a multi-file / bundled entry that includes pure **and** host-preferring API.
-Stage-2 builders inject host crypto (go/lua/rust) so standalone runs stay fast;
-pure remains the fallback if host is disabled (`SHEN_X_SHA256=pure`).
-
-## Layout
-
-```
-shen/x/sha256.shen               public API + host detect + lazy pure
-shen/x/sha256-pure.shen          pure oracle
-shen/x/sha256-portable.shen      pure-only API (shake / standalone)
-shen/x/zmq.shen                  ZMQ API over the 10-prim host waist (host-only)
-programs/sha256-smoke.shen       Bifrost agreement (load + host)
-programs/sha256-smoke-body.shen  multi-file shake body
-programs/sha256-smoke.shake.shen bundled pure entry (Bifrost --shake)
-programs/zmq-*.shen              ZMQ agreement transcripts (5 cases)
-tests/run-sha256.shen            vector suite
-tests/run-zmq.shen               zmq group suite (ALL PASS)
-bifrost.suite.json               load-from-source agreement
-bifrost.shake.suite.json         deploy-path (--shake) suite
-adapters.json                    local port launchers
-scripts/run-bifrost.sh
-scripts/run-bifrost-shake.sh
-scripts/shake.sh                 multi-file stage-1
-scripts/bundle-shake-entry.sh
-scripts/check.sh
-Makefile
-ports/shen-cl/                   optional CL OpenSSL host
+```text
+load.shen                         load all extensions
+shen/x/sha256.shen                public SHA-256 API and backend selection
+shen/x/sha256-pure.shen           pure Shen SHA-256 implementation
+shen/x/zmq.shen                   public ZeroMQ API
+examples/                         small runnable programs
+tests/                            extension test suites
+ports/                            host-backend contracts and adapters
+programs/                         Bifrost and Yggdrasil test programs
+scripts/shen-x                    portable launcher wrapper
+scripts/run-bifrost*.sh           cross-port verification
+scripts/shake.sh                  Yggdrasil standalone-build check
+adapters.json                     local Bifrost port launchers
 ```
 
 ## License
 
-BSD-3-Clause (same lineage as Shen tooling in this workspace).
+BSD-3-Clause.

@@ -74,6 +74,33 @@ implementation, so it works even when a port has no native crypto backend.
 ZeroMQ performs host I/O and has no meaningful pure fallback; on an unsupported
 port its functions raise a catchable Shen error instead.
 
+### How the pieces fit together
+
+The extension layer combines three deliberately separate concerns:
+
+```text
+module descriptor       selects and orders source files
+        |
+portable shen.x API     keeps application code identical across ports
+        |
+feature query           reports which native backends this process installed
+        |
+host backend or pure Shen implementation
+```
+
+The `.shenmod` descriptors make the extensions usable through Shen Batteries,
+while `load.shen` remains the compatibility entry point for ports without its
+module loader. Module loading is about names, dependencies, and source order;
+it does not force a host backend.
+
+Backend selection remains an extension-level runtime decision. SHA-256 falls
+back to pure Shen when `shen.x/sha256-host` is absent (or when
+`SHEN_X_SHA256=pure` is set). ZeroMQ requires host I/O and reports an absent
+backend through its existing catchable error. Ports expose the installed
+capabilities through `shen.x.features.current`, so Shen Batteries code can
+inspect or conditionally expand against the same facts without changing the
+portable API.
+
 ## SHA-256
 
 ```shen

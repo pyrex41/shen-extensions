@@ -1,5 +1,5 @@
 (shen.module
   (version 1)
   (name shen.x)
-  (requires shen.x.sha256 shen.x.zmq)
-  (sources tc+ "shen/x/package.shen"))
+  (requires shen/x)
+  (sources tc+ "shen/x/compat-package.shen"))

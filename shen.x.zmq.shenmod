@@ -1,4 +1,5 @@
 (shen.module
   (version 1)
   (name shen.x.zmq)
-  (sources tc+ "shen/x/zmq.shen"))
+  (requires shen/x/zmq)
+  (sources tc+ "shen/x/compat-zmq.shen"))

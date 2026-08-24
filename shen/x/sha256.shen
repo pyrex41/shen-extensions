@@ -24,10 +24,15 @@
   -> (if (shen.x.host-sha256?) host pure))
 
 \\ Lazy-load pure only when host is absent (Lua 200-local limit; load silence).
+(define shen.x.load-pure
+  -> (trap-error
+       (load "shen/x/sha256-pure.shen")
+       (/. E (load "sha256-pure.shen"))))
+
 (define shen.x.ensure-pure
   -> (trap-error
        (value shen.x.*pure-loaded*)
-       (/. E (do (load "shen/x/sha256-pure.shen")
+       (/. E (do (shen.x.load-pure)
                  (set shen.x.*pure-loaded* true)))))
 
 (define shen.x.sha256-octets

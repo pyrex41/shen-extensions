@@ -1,0 +1,4 @@
+(shen.module
+  (version 1)
+  (name shen/x/sha256)
+  (sources tc+ "sha256.shen"))

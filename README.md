@@ -40,13 +40,14 @@ first `library.use` call:
 ```shen
 (load "/path/to/shen-batteries/library.shen")
 (library.set-home "/path/to/shen-extensions")
-(library.use [shen.x])
+(library.use [shen/x])
 ```
 
-`shen.x` depends on `shen.x.sha256` and `shen.x.zmq`; the descriptors are
-`shen.x.shenmod`, `shen.x.sha256.shenmod`, and `shen.x.zmq.shenmod`. The
-existing `load.shen` and direct source loads remain supported for ports that do
-not provide the module loader.
+The canonical modules are `shen/x`, `shen/x/sha256`, and `shen/x/zmq`, with
+descriptors at `shen/x.shenmod`, `shen/x/sha256.shenmod`, and
+`shen/x/zmq.shenmod`. The older `shen.x`, `shen.x.sha256`, and `shen.x.zmq`
+descriptors remain compatibility aliases. The existing `load.shen` and direct
+source loads remain supported for ports that do not provide the module loader.
 
 The included wrapper sets the Shen home directory for sibling port checkouts:
 
@@ -268,6 +269,9 @@ portable SHA-256 module must continue to work without its host feature.
 
 ```text
 load.shen                         load all extensions
+shen/x.shenmod                    canonical aggregate module descriptor
+shen/x/*.shenmod                  canonical per-extension descriptors
+shen.x*.shenmod                   temporary legacy descriptor aliases
 shen/x/sha256.shen                public SHA-256 API and backend selection
 shen/x/sha256-pure.shen           pure Shen SHA-256 implementation
 shen/x/zmq.shen                   public ZeroMQ API

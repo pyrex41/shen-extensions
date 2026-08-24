@@ -31,6 +31,23 @@ You can also load one extension directly:
 (load "shen/x/zmq.shen")
 ```
 
+### Shen Batteries modules
+
+When the Shen Batteries module loader is available, the same extensions can
+be loaded as named modules. Set the module home to this repository before the
+first `library.use` call:
+
+```shen
+(load "/path/to/shen-batteries/library.shen")
+(library.set-home "/path/to/shen-extensions")
+(library.use [shen.x])
+```
+
+`shen.x` depends on `shen.x.sha256` and `shen.x.zmq`; the descriptors are
+`shen.x.shenmod`, `shen.x.sha256.shenmod`, and `shen.x.zmq.shenmod`. The
+existing `load.shen` and direct source loads remain supported for ports that do
+not provide the module loader.
+
 The included wrapper sets the Shen home directory for sibling port checkouts:
 
 ```bash
@@ -213,6 +230,12 @@ backend as available. User programs continue to call only the public Shen API.
 
 The exact primitive names, arities, return values, error behavior, and
 installation points are documented in [`ports/README.md`](ports/README.md).
+
+Ports that integrate with Shen Batteries should also expose the zero-arity
+`shen.x.features.current` query. It returns namespaced capabilities for the
+backends installed in that process, currently `shen.x/sha256-host` and
+`shen.x/zmq-host`. A disabled or unavailable backend must be omitted; the
+portable SHA-256 module must continue to work without its host feature.
 
 ## Repository layout
 

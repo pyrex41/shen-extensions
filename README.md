@@ -31,6 +31,30 @@ You can also load one extension directly:
 (load "shen/x/zmq.shen")
 ```
 
+### Shen Batteries modules
+
+When the Shen Batteries module loader is available, the same extensions can
+be loaded as named modules. Set the module home to this repository before the
+first `library.use` call:
+
+```shen
+(load "/path/to/shen-batteries/library.shen")
+(library.set-home "/path/to/shen-extensions")
+(library.use [shen/x])
+```
+
+The canonical modules are `shen/x`, `shen/x/sha256`, and `shen/x/zmq`, with
+descriptors at `shen/x.shenmod`, `shen/x/sha256.shenmod`, and
+`shen/x/zmq.shenmod`. Shen Batteries resolves each `sources` path relative to
+the directory that contains the descriptor (`<module-home>/<parent-of-name>/`),
+not from the repository root: `shen/x.shenmod` therefore lists `x/package.shen`
+(the file at `shen/x/package.shen`), while `shen/x/sha256.shenmod` lists
+`sha256.shen`. Root-level legacy aliases such as `shen.x.shenmod` still use
+paths from the module home (`shen/x/compat-package.shen`). The older `shen.x`,
+`shen.x.sha256`, and `shen.x.zmq` descriptors remain compatibility aliases. The
+existing `load.shen` and direct source loads remain supported for ports that do
+not provide the module loader.
+
 The included wrapper sets the Shen home directory for sibling port checkouts:
 
 ```bash
@@ -56,6 +80,33 @@ The port-specific details stay behind that API. SHA-256 includes a pure Shen
 implementation, so it works even when a port has no native crypto backend.
 ZeroMQ performs host I/O and has no meaningful pure fallback; on an unsupported
 port its functions raise a catchable Shen error instead.
+
+### How the pieces fit together
+
+The extension layer combines three deliberately separate concerns:
+
+```text
+module descriptor       selects and orders source files
+        |
+portable shen.x API     keeps application code identical across ports
+        |
+feature query           reports which native backends this process installed
+        |
+host backend or pure Shen implementation
+```
+
+The `.shenmod` descriptors make the extensions usable through Shen Batteries,
+while `load.shen` remains the compatibility entry point for ports without its
+module loader. Module loading is about names, dependencies, and source order;
+it does not force a host backend.
+
+Backend selection remains an extension-level runtime decision. SHA-256 falls
+back to pure Shen when `shen.x/sha256-host` is absent (or when
+`SHEN_X_SHA256=pure` is set). ZeroMQ requires host I/O and reports an absent
+backend through its existing catchable error. Ports expose the installed
+capabilities through `shen.x.features.current`, so Shen Batteries code can
+inspect or conditionally expand against the same facts without changing the
+portable API.
 
 ## SHA-256
 
@@ -214,10 +265,19 @@ backend as available. User programs continue to call only the public Shen API.
 The exact primitive names, arities, return values, error behavior, and
 installation points are documented in [`ports/README.md`](ports/README.md).
 
+Ports that integrate with Shen Batteries should also expose the zero-arity
+`shen.x.features.current` query. It returns namespaced capabilities for the
+backends installed in that process, currently `shen.x/sha256-host` and
+`shen.x/zmq-host`. A disabled or unavailable backend must be omitted; the
+portable SHA-256 module must continue to work without its host feature.
+
 ## Repository layout
 
 ```text
 load.shen                         load all extensions
+shen/x.shenmod                    canonical aggregate module descriptor
+shen/x/*.shenmod                  canonical per-extension descriptors
+shen.x*.shenmod                   temporary legacy descriptor aliases
 shen/x/sha256.shen                public SHA-256 API and backend selection
 shen/x/sha256-pure.shen           pure Shen SHA-256 implementation
 shen/x/zmq.shen                   public ZeroMQ API

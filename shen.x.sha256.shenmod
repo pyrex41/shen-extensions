@@ -1,0 +1,5 @@
+(shen.module
+  (version 1)
+  (name shen.x.sha256)
+  (requires shen/x/sha256)
+  (sources tc+ "shen/x/compat-sha256.shen"))

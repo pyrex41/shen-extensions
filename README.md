@@ -45,9 +45,15 @@ first `library.use` call:
 
 The canonical modules are `shen/x`, `shen/x/sha256`, and `shen/x/zmq`, with
 descriptors at `shen/x.shenmod`, `shen/x/sha256.shenmod`, and
-`shen/x/zmq.shenmod`. The older `shen.x`, `shen.x.sha256`, and `shen.x.zmq`
-descriptors remain compatibility aliases. The existing `load.shen` and direct
-source loads remain supported for ports that do not provide the module loader.
+`shen/x/zmq.shenmod`. Shen Batteries resolves each `sources` path relative to
+the directory that contains the descriptor (`<module-home>/<parent-of-name>/`),
+not from the repository root: `shen/x.shenmod` therefore lists `x/package.shen`
+(the file at `shen/x/package.shen`), while `shen/x/sha256.shenmod` lists
+`sha256.shen`. Root-level legacy aliases such as `shen.x.shenmod` still use
+paths from the module home (`shen/x/compat-package.shen`). The older `shen.x`,
+`shen.x.sha256`, and `shen.x.zmq` descriptors remain compatibility aliases. The
+existing `load.shen` and direct source loads remain supported for ports that do
+not provide the module loader.
 
 The included wrapper sets the Shen home directory for sibling port checkouts:
 

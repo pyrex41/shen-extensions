@@ -4,8 +4,8 @@
     "Override with $BIFROST_ADAPTERS or per-impl $BIFROST_SHEN_* env vars.",
     "Copy/adjust paths if your ports live elsewhere.",
     "default_paths are tried in order, so keep the current checkout first:",
-    "urdr-shen-cl-41.2 is a stale tree predating the shen.x host backend and",
-    "the Tarver S41.2 kernel, and listing it first silently ran the pure",
+    "legacy urdr Shen trees are stale and predate the shen.x host backend and",
+    "the Tarver Shen 42 kernel; listing one first silently runs the pure",
     "fallback while the host lane looked green."
   ],
   "shen-cl": {
